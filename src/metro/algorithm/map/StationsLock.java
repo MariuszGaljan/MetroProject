@@ -1,0 +1,149 @@
+package metro.algorithm.map;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * Class used to ensure that trains only move when the station's entrance
+ * they're headed to is not occupied.
+ * <p>
+ * The assumption is that a train reaches a station when one of its wagons is on a tile adjacent to the station.
+ * There can be many trains at one station as long as there's max one on each tile adjacent to this station.
+ * <p>
+ * It creates and uses a list of Conditions from a given lock,
+ * one for each station's entrance
+ */
+public class StationsLock {
+    /**
+     * Instance of a package-private class TunnelsMap
+     * */
+    TunnelsMap mapWrapper;
+    /**
+     * the map is defined in the TunnelsMap package-private class
+     */
+    FieldTypes[][] tunnelsMap;
+
+    /**
+     * List of station's entrances coordinates
+     */
+    List<Coordinates> coordinates;
+    /**
+     * List of condition of the same size as coordinates
+     */
+    List<Condition> conditions;
+    /**
+     * Logical values used with conditions
+     */
+    boolean[] entranceOccupied;
+
+    /**
+     * A lock passed through a constructor used to create the conditions.
+     */
+    ReentrantLock lock;
+
+    /**
+     * @param stations an array of stations' coordinates
+     * @param lock     a lock used in the synchronization process
+     */
+    public StationsLock(TunnelsMap mapWrapper, Coordinates[] stations, ReentrantLock lock) {
+        this.mapWrapper = mapWrapper;
+        this.tunnelsMap = mapWrapper.map;
+        this.lock = lock;
+        coordinates = new LinkedList<>();
+        conditions = new ArrayList<>();
+        for (Coordinates station : stations) {
+            createStationConditions(station);
+        }
+        // we initialize all boolean occupied values to false...
+        entranceOccupied = new boolean[conditions.size()];
+        Arrays.fill(entranceOccupied, false);
+        // ... except for the starting entrances of the trains
+        markInitialTrainEntrances();
+    }
+
+    /**
+     * Locks the lock and waits until the destination entrance is not occupied.
+     * Marks the destination as occupied.
+     *
+     * @param destination coordinates of the destination to occupy
+     * @param supervisor  a condition that is signaled if the destination is locked.
+     *                    Used to launch the next train in case this one can't move.
+     */
+    public void lockDestination(Coordinates destination, Condition supervisor) throws InterruptedException {
+        lock.lock();
+        int i = getIndex(destination);
+
+
+        while (entranceOccupied[i]) {
+            System.out.print(Thread.currentThread().getName() + ": Entrance " + coordinates.get(i) + " is taken. ");
+            System.out.println("Signaling next train");
+            supervisor.signal();
+            conditions.get(i).await();
+        }
+
+        entranceOccupied[i] = true;
+    }
+
+    /**
+     * Marks the starting point as not occupied and signals the trains waiting for it to be released.
+     * The lock should be released manually
+     */
+    public void signalStartingPoint(Coordinates startingPoint) {
+        int i = getIndex(startingPoint);
+        entranceOccupied[i] = false;
+        conditions.get(i).signalAll();
+//        lock.unlock();
+    }
+
+    /**
+     * Return the index of coordinates in the coordinates list.
+     *
+     * @param coordinates coordinates to look for in the list.
+     */
+    private int getIndex(Coordinates coordinates) {
+        return this.coordinates.indexOf(coordinates);
+    }
+
+    /**
+     * Creates a condition for every tile marked as empty adjacent to the given station (station's entrance)
+     *
+     * @param station coordinates of a station.
+     */
+    private void createStationConditions(Coordinates station) {
+        int[] possibleVectors = {-1, 0, 1};
+        int x, y;
+
+        for (int vectorX : possibleVectors) {
+            for (int vectorY : possibleVectors) {
+                if (vectorX != 0 || vectorY != 0) {
+                    x = station.getX() + vectorX;
+                    y = station.getY() + vectorY;
+
+                    if (x >= 0 && x < TunnelsMap.height)
+                        if (y >= 0 && y < TunnelsMap.width)
+                            if (tunnelsMap[x][y] != FieldTypes.WALL) {
+                                coordinates.add(new Coordinates(x, y));
+                                conditions.add(lock.newCondition());
+                            }
+                }
+            }
+        }
+    }
+
+    /**
+     * Marks the stations' entrances that the trains are on at the start of the program.
+     */
+    private void markInitialTrainEntrances() {
+        int i;
+        for (Coordinates c : coordinates) {
+            if (tunnelsMap[c.getX()][c.getY()] != FieldTypes.EMPTY) {
+                i = coordinates.indexOf(c);
+                entranceOccupied[i] = true;
+            }
+        }
+    }
+}
