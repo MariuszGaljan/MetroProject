@@ -39,6 +39,9 @@ public class MapPanel extends JPanel {
         tunnelsMapMonitor = monitor;
     }
 
+    /**
+     * Sets the monitor and repaints the JPanel
+     * */
     public void setTunnelsMapMonitor(TunnelsMapMonitor monitor) {
         this.tunnelsMapMonitor = monitor;
         revalidate();
@@ -63,14 +66,10 @@ public class MapPanel extends JPanel {
         int tileWidth = width / tileCols;
         int tileHeight = height / tileRows;
 
-        FieldTypes field;
-
         for (int i = 0; i < tileCols; i++) {
             for (int j = 0; j < tileRows; j++) {
-                field = tunnelsMapMonitor.getField(new Coordinates(j, i));
-
+                FieldTypes field = tunnelsMapMonitor.getField(new Coordinates(j, i));
                 setTileColor(g, field);
-
                 g.fillRect(spacing + i * tileWidth, spacing + j * tileHeight, tileWidth - spacing * 2, tileHeight - spacing * 2);
             }
         }

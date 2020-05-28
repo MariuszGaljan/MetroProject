@@ -1,12 +1,11 @@
 package metro.algorithm.map;
 
-import metro.gui.MetroGUI;
-
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -241,6 +240,9 @@ public class TunnelsMapMonitor {
     }
 
 
+    /**
+     * Acquires the synchronization tools
+     * */
     public void beginPainting() {
         try {
             readSem.acquire();

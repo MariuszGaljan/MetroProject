@@ -41,6 +41,9 @@ public class SimulationModel {
         pause();
     }
 
+    /**
+     * Ends the simulation by interrupting its thread.
+     * */
     public void end() {
         for (Thread t : trains)
                 if (t != null)

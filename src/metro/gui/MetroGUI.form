@@ -17,7 +17,6 @@
         </constraints>
         <properties>
           <foreground color="-12828863"/>
-          <toolTipText value="Shows current metro state"/>
         </properties>
         <border type="line"/>
         <children/>

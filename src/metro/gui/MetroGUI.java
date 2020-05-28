@@ -15,16 +15,29 @@ public class MetroGUI extends JFrame {
      * The panel showing the current state of the tunnel's map.
      */
     private JPanel mapPanel;
+    /**
+     * Allows usage of the MapPanel methods of mapPanel.
+     * <p>
+     * Added due to some problem with adding non palette component in my IDE
+     */
+    private MapPanel mapPanelType;
     private JButton startPauseButton;
     private JButton resetButton;
+
+    /**
+     * The simulation model of the metro
+     */
+    private SimulationModel metro;
 
     /**
      * The monitor of the tunnel's map.
      */
     private TunnelsMapMonitor tunnelsMapMonitor;
 
-    private SimulationModel metro;
 
+    /**
+     * Used to manage the execution of the updateGUI thread.
+     */
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
     /**
@@ -35,7 +48,6 @@ public class MetroGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(MainPanel);
         addListeners();
-
         pack();
         setVisible(true);
     }
@@ -48,7 +60,8 @@ public class MetroGUI extends JFrame {
             metro = new SimulationModel();
         if (tunnelsMapMonitor == null)
             tunnelsMapMonitor = metro.getMonitor();
-        mapPanel = new MapPanel(tunnelsMapMonitor);
+        mapPanelType = new MapPanel(tunnelsMapMonitor);
+        mapPanel = mapPanelType;
     }
 
     private void addListeners() {
@@ -60,8 +73,6 @@ public class MetroGUI extends JFrame {
                     @Override
                     protected Void doInBackground() {
                         while (isRunning.get()) {
-                            System.out.println(isRunning.get());
-
                             updateGUI();
                         }
                         return null;
@@ -77,16 +88,22 @@ public class MetroGUI extends JFrame {
             }
         });
 
-//        resetButton.addActionListener(e -> {
-//            metro.end();
-//            isRunning.set(false);
-//            metro = new SimulationModel();
-//            tunnelsMapMonitor = metro.getMonitor();
-//            startPauseButton.setText("Start simulation");
-//            startPauseButton.setToolTipText("Starts the simulation");
-//            revalidate();
-//            repaint();
-//        });
+        resetButton.addActionListener(e -> {
+            // first we stop the model
+            metro.end();
+            // then we stop the thread that's updating the map
+            isRunning.set(false);
+            // then we create a new model
+            metro = new SimulationModel();
+            tunnelsMapMonitor = metro.getMonitor();
+            mapPanelType.setTunnelsMapMonitor(tunnelsMapMonitor);
+
+            startPauseButton.setText("Start simulation");
+            startPauseButton.setToolTipText("Starts the simulation");
+
+            revalidate();
+            repaint();
+        });
     }
 
 
