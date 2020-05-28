@@ -1,10 +1,13 @@
 package metro;
 
 import metro.algorithm.map.Coordinates;
+import metro.algorithm.map.FieldTypes;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class
 ModelParameters {
@@ -39,12 +42,18 @@ ModelParameters {
 
     public Coordinates[] t1Route, t2Route, t3Route;
 
-    public ModelParameters() {
+    public Queue<FieldTypes> trainOrder;
+
+    public ModelParameters(FieldTypes[] trainOrder) {
         t1Route = createT1Route();
         t2Route = createT2Route();
         t3Route = createT3Route();
+        this.trainOrder = setTrainOrder(trainOrder);
     }
 
+    /**
+     * Generates an array of coordinates specifying the route of train 1
+     */
     private Coordinates[] createT1Route() {
         List<Coordinates> route = new LinkedList<>();
         for (int i = 1; i < 6; i++)
@@ -57,6 +66,9 @@ ModelParameters {
         return route.toArray(new Coordinates[0]);
     }
 
+    /**
+     * Generates an array of coordinates specifying the route of train 2
+     */
     private Coordinates[] createT2Route() {
         List<Coordinates> route = new LinkedList<>();
         for (int i = 1; i < 9; i++)
@@ -73,6 +85,9 @@ ModelParameters {
         return route.toArray(new Coordinates[0]);
     }
 
+    /**
+     * Generates an array of coordinates specifying the route of train 3
+     */
     private Coordinates[] createT3Route() {
         List<Coordinates> route = new LinkedList<>();
         for (int i = 15; i >= 8; i--)
@@ -85,5 +100,14 @@ ModelParameters {
             route.add(new Coordinates(0, i));
 
         return route.toArray(new Coordinates[0]);
+    }
+
+    /**
+     * Generates a queue from a given array, specifying the initial order of the trains
+     * */
+    public Queue<FieldTypes> setTrainOrder(FieldTypes[] trains) {
+        Queue<FieldTypes> queue = new ConcurrentLinkedQueue<>();
+        Collections.addAll(queue, trains);
+        return queue;
     }
 }

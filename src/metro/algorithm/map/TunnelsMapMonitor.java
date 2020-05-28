@@ -51,7 +51,7 @@ public class TunnelsMapMonitor {
      * A condition used to ensure that only one train is moving at any time
      */
     Condition supervisor = lock.newCondition();
-    Queue<FieldTypes> trainQueue = new ConcurrentLinkedQueue<>();
+    Queue<FieldTypes> trainQueue;
 
 
     /**
@@ -61,16 +61,14 @@ public class TunnelsMapMonitor {
      *                 Each train is defined by an array of Coordinates values of its wagons.
      * @param stations an array of stations' coordinates
      */
-    public TunnelsMapMonitor(Coordinates[][] trains, Coordinates[] stations) {
+    public TunnelsMapMonitor(Coordinates[][] trains, Coordinates[] stations, Queue<FieldTypes> trainOrder) {
         // adding trains to the map
         markTrain(trains[0], FieldTypes.T1);
         markTrain(trains[1], FieldTypes.T2);
         markTrain(trains[2], FieldTypes.T3);
 
         // initial order of the trains
-        trainQueue.add(FieldTypes.T3);
-        trainQueue.add(FieldTypes.T1);
-        trainQueue.add(FieldTypes.T2);
+        trainQueue = trainOrder;
 
         // adding station to the map
         TunnelsMap.stations = stations;

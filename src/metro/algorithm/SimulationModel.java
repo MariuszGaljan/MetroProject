@@ -25,10 +25,10 @@ public class SimulationModel {
     Train[] trains = new Train[ModelParameters.numberOfTrains];
 
 
-    public SimulationModel() {
+    public SimulationModel(FieldTypes[] trainOrder) {
         // here we specify the parameters of the simulation
-        modelParams = new ModelParameters();
-        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations);
+        modelParams = new ModelParameters(trainOrder);
+        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.trainOrder);
 
         trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Route);
         trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Route);
@@ -72,6 +72,15 @@ public class SimulationModel {
      */
     public TunnelsMapMonitor getMonitor() {
         return monitor;
+    }
+
+
+    public void setTrainOrder(FieldTypes[] trainOrder) {
+        modelParams.setTrainOrder(trainOrder);
+    }
+
+    public int getNumberOfTrains() {
+        return ModelParameters.numberOfTrains;
     }
 
 
