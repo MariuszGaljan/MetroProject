@@ -2,10 +2,8 @@ package metro.algorithm.map;
 
 import java.util.Arrays;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -73,7 +71,7 @@ public class TunnelsMapMonitor {
         // adding station to the map
         TunnelsMap.stations = stations;
         for (Coordinates station : TunnelsMap.stations)
-            tunnelsMap[station.getX()][station.getY()] = FieldTypes.STATION;
+            tunnelsMap[station.getRow()][station.getCol()] = FieldTypes.STATION;
 
         // initializing the locks for every station's entrance (side)
         stationsLock = new StationsLock(mapWrapper, stations, lock);
@@ -211,7 +209,7 @@ public class TunnelsMapMonitor {
      */
     private void markTrain(Coordinates[] wagons, FieldTypes trainType) {
         for (Coordinates actWagon : wagons)
-            tunnelsMap[actWagon.getX()][actWagon.getY()] = trainType;
+            tunnelsMap[actWagon.getRow()][actWagon.getCol()] = trainType;
     }
 
     /**
@@ -221,7 +219,7 @@ public class TunnelsMapMonitor {
      */
     private void eraseTrain(Coordinates[] wagons) {
         for (Coordinates actWagon : wagons)
-            tunnelsMap[actWagon.getX()][actWagon.getY()] = FieldTypes.EMPTY;
+            tunnelsMap[actWagon.getRow()][actWagon.getCol()] = FieldTypes.EMPTY;
     }
 
     /**
@@ -240,7 +238,7 @@ public class TunnelsMapMonitor {
 
     /**
      * Acquires the synchronization tools
-     * */
+     */
     public void beginPainting() {
         try {
             readSem.acquire();
@@ -260,6 +258,14 @@ public class TunnelsMapMonitor {
      * @return the FieldTypes value of the field
      */
     public FieldTypes getField(Coordinates field) {
-        return tunnelsMap[field.getX()][field.getY()];
+        return tunnelsMap[field.getRow()][field.getCol()];
+    }
+
+    public static int getWidth() {
+        return TunnelsMap.WIDTH;
+    }
+
+    public static int getHeight() {
+        return TunnelsMap.HEIGHT;
     }
 }

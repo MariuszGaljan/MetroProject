@@ -19,14 +19,18 @@ public class MapPanel extends JPanel {
      * Columns in the tunnel's map
      */
     private final int tileCols = 11;
+
+    private final int preferredWidth = 816;
+    private final int preferredHeight = 605;
+
     /**
      * Width of the panel
      */
-    private final int width = 816;
+    private int width = preferredWidth;
     /**
      * Height of the panel
      */
-    private final int height = 605;
+    private int height = preferredHeight;
     /**
      * Defines the distance between the tiles
      */
@@ -50,7 +54,7 @@ public class MapPanel extends JPanel {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(width, height);
+        return new Dimension(preferredWidth, preferredHeight);
     }
 
     /**
@@ -59,6 +63,8 @@ public class MapPanel extends JPanel {
      */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        width = getWidth();
+        height = getHeight();
         this.setBackground(Color.DARK_GRAY);
         g.setColor(Color.DARK_GRAY);
         g.fillRect(0, 0, width, height);

@@ -3,18 +3,18 @@ package metro.algorithm.map;
 import java.util.Objects;
 
 /**
- * Used to define (x, y) coordinates of a point on the tunnel's map
+ * Used to define (row, column) coordinates of a point on the tunnel's map
  */
 public class Coordinates {
-    private int x, y;
+    private int row, col;
 
     /**
-     * @param x row value of this point
-     * @param y column value of this point
+     * @param row row value of this point
+     * @param col column value of this point
      */
-    public Coordinates(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public Coordinates(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 
     /**
@@ -23,22 +23,22 @@ public class Coordinates {
      * @param coordinates another Coordinates point that is copied to this object
      */
     public Coordinates(Coordinates coordinates) {
-        x = coordinates.getX();
-        y = coordinates.getY();
+        row = coordinates.getRow();
+        col = coordinates.getCol();
     }
 
     /**
-     * Returns the x coordinate (row) of this point
+     * Returns the row coordinate of this point
      */
-    public int getX() {
-        return x;
+    public int getRow() {
+        return row;
     }
 
     /**
-     * Returns the y coordinate (column) of this point
+     * Returns the column coordinate of this point
      */
-    public int getY() {
-        return y;
+    public int getCol() {
+        return col;
     }
 
     /**
@@ -47,13 +47,13 @@ public class Coordinates {
      * @param newCoordinate position to move to.
      */
     public void moveTo(Coordinates newCoordinate) {
-        x += newCoordinate.getX() - x;
-        y += newCoordinate.getY() - y;
+        row += newCoordinate.getRow() - row;
+        col += newCoordinate.getCol() - col;
     }
 
     @Override
     public String toString() {
-        return "(" + x + "," + y + ")";
+        return "(" + row + "," + col + ")";
     }
 
     @Override
@@ -61,12 +61,12 @@ public class Coordinates {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Coordinates that = (Coordinates) o;
-        return x == that.getX() &&
-                y == that.getY();
+        return row == that.getRow() &&
+                col == that.getCol();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash(row, col);
     }
 }

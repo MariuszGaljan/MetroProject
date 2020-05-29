@@ -12,11 +12,11 @@ class TunnelsMap {
     /**
      * Width of the map
      */
-    public static int width = 11;
+    public static final int WIDTH = 11;
     /**
      * Height of the map
      */
-    public static int height = 17;
+    public static final int HEIGHT = 17;
 
     /**
      * Used to shorten the enum values and make the map more

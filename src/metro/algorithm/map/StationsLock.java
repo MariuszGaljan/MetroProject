@@ -115,18 +115,18 @@ public class StationsLock {
      */
     private void createStationConditions(Coordinates station) {
         int[] possibleVectors = {-1, 0, 1};
-        int x, y;
+        int row, col;
 
-        for (int vectorX : possibleVectors) {
-            for (int vectorY : possibleVectors) {
-                if (vectorX != 0 || vectorY != 0) {
-                    x = station.getX() + vectorX;
-                    y = station.getY() + vectorY;
+        for (int vectorRow : possibleVectors) {
+            for (int vectorCol : possibleVectors) {
+                if (vectorRow != 0 || vectorCol != 0) {
+                    row = station.getRow() + vectorRow;
+                    col = station.getCol() + vectorCol;
 
-                    if (x >= 0 && x < TunnelsMap.height)
-                        if (y >= 0 && y < TunnelsMap.width)
-                            if (tunnelsMap[x][y] != FieldTypes.WALL) {
-                                coordinates.add(new Coordinates(x, y));
+                    if (row >= 0 && row < TunnelsMap.HEIGHT)
+                        if (col >= 0 && col < TunnelsMap.WIDTH)
+                            if (tunnelsMap[row][col] != FieldTypes.WALL) {
+                                coordinates.add(new Coordinates(row, col));
                                 conditions.add(lock.newCondition());
                             }
                 }
@@ -140,7 +140,7 @@ public class StationsLock {
     private void markInitialTrainEntrances() {
         int i;
         for (Coordinates c : coordinates) {
-            if (tunnelsMap[c.getX()][c.getY()] != FieldTypes.EMPTY) {
+            if (tunnelsMap[c.getRow()][c.getCol()] != FieldTypes.EMPTY) {
                 i = coordinates.indexOf(c);
                 entranceOccupied[i] = true;
             }

@@ -2,16 +2,17 @@ package metro;
 
 import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
+import metro.algorithm.map.TunnelsMapMonitor;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.awt.image.MemoryImageSource;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class
 ModelParameters {
     public static final int numberOfTrains = 3;
+    private final Coordinates middle
+            = new Coordinates(TunnelsMapMonitor.getHeight() / 2, TunnelsMapMonitor.getWidth() / 2);
 
     public Coordinates[] stations = {
             new Coordinates(0, 0),
@@ -45,11 +46,81 @@ ModelParameters {
     public Queue<FieldTypes> trainOrder;
 
     public ModelParameters(FieldTypes[] trainOrder) {
-        t1Route = createT1Route();
-        t2Route = createT2Route();
-        t3Route = createT3Route();
+        t1Route = generateRoute(new Coordinates(0, 1), new Coordinates(16, 9));
+        t2Route = generateRoute(new Coordinates(16, 1), new Coordinates(1, 0));
+        t3Route = generateRoute(new Coordinates(15, 10), new Coordinates(0, 1));
         this.trainOrder = setTrainOrder(trainOrder);
     }
+
+    private Coordinates[] generateRoute(Coordinates start, Coordinates end) {
+        List<Coordinates> route = getRouteToTheMiddle(start);
+        route.add(middle);
+
+        List<Coordinates> routeToMiddleFromEnd = getRouteToTheMiddle(end);
+        Collections.reverse(routeToMiddleFromEnd);
+        route.addAll(routeToMiddleFromEnd);
+
+        return route.toArray(new Coordinates[0]);
+    }
+
+    private List<Coordinates> getRouteToTheMiddle(Coordinates start) {
+        List<Coordinates> route = new LinkedList<>();
+        Coordinates actStart = start;
+        Coordinates actEnd;
+        boolean actHorizontal;
+
+        // first we add a line to the crossing
+        if (actStart.getCol() == 1 || actStart.getCol() == TunnelsMapMonitor.getWidth() - 2) {
+            actHorizontal = true;
+            actEnd = new Coordinates(actStart.getRow(), TunnelsMapMonitor.getWidth() / 2);
+        } else {
+            actHorizontal = false;
+            actEnd = new Coordinates(TunnelsMapMonitor.getHeight() / 2, actStart.getCol());
+        }
+        addLine(route, actStart, actEnd, actHorizontal);
+        actStart = actEnd;
+
+        // then we add a line to the middle
+        actHorizontal = (actStart.getRow() == middle.getRow());
+        addLine(route, actStart, middle, actHorizontal);
+
+        return route;
+    }
+
+    /**
+     * Appends a line represented by a list of coordinates to the route.
+     * The line includes points in range [start, end).
+     * A line can be horizontal or vertical.
+     *
+     * @param route      list of coordinates the line is supposed to be added to
+     * @param start      coordinates of the starting point
+     * @param end        coordinates of the end point
+     * @param horizontal defines whether the line is horizontal or vertical
+     */
+    private void addLine(List<Coordinates> route, Coordinates start, Coordinates end, boolean horizontal) {
+        if (horizontal) {
+            if (start.getCol() < end.getCol()) {
+                // left to right
+                for (int i = start.getCol(); i < end.getCol(); i++)
+                    route.add(new Coordinates(start.getRow(), i));
+            } else {
+                // right to left
+                for (int i = start.getCol(); i > end.getCol(); i--)
+                    route.add(new Coordinates(start.getRow(), i));
+            }
+        } else {
+            if (start.getRow() < end.getRow()) {
+                // bottom to top
+                for (int i = start.getRow(); i < end.getRow(); i++)
+                    route.add(new Coordinates(i, start.getCol()));
+            } else {
+                // top to bottom
+                for (int i = start.getRow(); i > end.getRow(); i--)
+                    route.add(new Coordinates(i, start.getCol()));
+            }
+        }
+    }
+
 
     /**
      * Generates an array of coordinates specifying the route of train 1
@@ -104,7 +175,7 @@ ModelParameters {
 
     /**
      * Generates a queue from a given array, specifying the initial order of the trains
-     * */
+     */
     public Queue<FieldTypes> setTrainOrder(FieldTypes[] trains) {
         Queue<FieldTypes> queue = new ConcurrentLinkedQueue<>();
         Collections.addAll(queue, trains);
