@@ -4,16 +4,25 @@ import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
+import javax.annotation.processing.SupportedSourceVersion;
 import java.awt.image.MemoryImageSource;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class
 ModelParameters {
-    public static final int numberOfTrains = 3;
-    private final Coordinates middle
+    public static final int NUMBER_OF_TRAINS = 3;
+    public static final int TRAIN_LENGTH = 3;
+
+    /**
+     * A constant variable specifying the position of the crossing on the tunnel's map
+     */
+    private static final Coordinates middle
             = new Coordinates(TunnelsMapMonitor.getHeight() / 2, TunnelsMapMonitor.getWidth() / 2);
 
+    /**
+     * Array of coordinates of stations on the map
+     */
     public Coordinates[] stations = {
             new Coordinates(0, 0),
             new Coordinates(16, 0),
@@ -21,39 +30,65 @@ ModelParameters {
     };
 
 
-    public Coordinates[] t1Wagons = {
-            new Coordinates(0, 1),
-            new Coordinates(0, 2),
-            new Coordinates(0, 3)
-    };
-
-    public Coordinates[] t2Wagons = {
-            new Coordinates(16, 1),
-            new Coordinates(16, 2),
-            new Coordinates(16, 3)
-    };
-
-    public Coordinates[] t3Wagons = {
-            new Coordinates(15, 10),
-            new Coordinates(14, 10),
-            new Coordinates(13, 10)
-    };
-
-    public Coordinates[][] trains = {t1Wagons, t2Wagons, t3Wagons};
+    public Coordinates[] t1Wagons;
+    public Coordinates[] t2Wagons;
+    public Coordinates[] t3Wagons;
+    public Coordinates[][] trains;
 
     public Coordinates[] t1Route, t2Route, t3Route;
 
     public Queue<FieldTypes> trainOrder;
 
+    /**
+     * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
+     *                   specifying the initial order of the trains
+     */
     public ModelParameters(FieldTypes[] trainOrder) {
         t1Route = generateRoute(new Coordinates(0, 1), new Coordinates(16, 9));
         t2Route = generateRoute(new Coordinates(16, 1), new Coordinates(1, 0));
         t3Route = generateRoute(new Coordinates(15, 10), new Coordinates(0, 1));
+
+        t1Wagons = generateTrainFromRoute(t1Route);
+        t2Wagons = generateTrainFromRoute(t2Route);
+        t3Wagons = generateTrainFromRoute(t3Route);
+
+        trains = new Coordinates[NUMBER_OF_TRAINS][];
+        trains[0] = t1Wagons;
+        trains[1] = t2Wagons;
+        trains[2] = t3Wagons;
+
         this.trainOrder = setTrainOrder(trainOrder);
     }
 
+    /**
+     * Generates a route from [start, end] (inclusive both ways).
+     *
+     * @param start coordinates of the starting point of the route
+     * @param end   coordinates of the end point of the route
+     * @return route from start to the end given by a list of coordinates
+     */
     private Coordinates[] generateRoute(Coordinates start, Coordinates end) {
-        List<Coordinates> route = getRouteToTheMiddle(start);
+        List<Coordinates> route;
+
+        // first, we have to check if start and end are station entrances opposite to each other in the same line
+        // because then we don't have to go into the passage
+        if (start.getRow() == end.getRow() && Math.abs(end.getCol() - start.getCol()) == TunnelsMapMonitor.getWidth() - 3) {
+            route = new LinkedList<>();
+            addLine(route, start, end, true);
+            route.add(end);
+            return route.toArray(new Coordinates[0]);
+        }
+        if (start.getCol() == end.getCol() && Math.abs(end.getRow() - start.getRow()) == TunnelsMapMonitor.getHeight() - 3) {
+            route = new LinkedList<>();
+            addLine(route, start, end, false);
+            route.add(end);
+            return route.toArray(new Coordinates[0]);
+        }
+
+        // if not, we create a route through the passage by connecting two routes:
+        //  - from start the middle
+        //  - a reversed route from end to the middle
+        route = getRouteToTheMiddle(start);
         route.add(middle);
 
         List<Coordinates> routeToMiddleFromEnd = getRouteToTheMiddle(end);
@@ -63,6 +98,12 @@ ModelParameters {
         return route.toArray(new Coordinates[0]);
     }
 
+    /**
+     * Generates a list of coordinates specifying a route from start to the middle of the map
+     *
+     * @param start Coordinates of the starting point
+     * @return route from start to the middle given by a list of coordinates
+     */
     private List<Coordinates> getRouteToTheMiddle(Coordinates start) {
         List<Coordinates> route = new LinkedList<>();
         Coordinates actStart = start;
@@ -123,62 +164,26 @@ ModelParameters {
 
 
     /**
-     * Generates an array of coordinates specifying the route of train 1
-     */
-    private Coordinates[] createT1Route() {
-        List<Coordinates> route = new LinkedList<>();
-        for (int i = 1; i < 6; i++)
-            route.add(new Coordinates(0, i));
-        for (int i = 1; i < 17; i++)
-            route.add(new Coordinates(i, 5));
-        for (int i = 6; i < 10; i++)
-            route.add(new Coordinates(16, i));
-
-        return route.toArray(new Coordinates[0]);
-    }
-
-    /**
-     * Generates an array of coordinates specifying the route of train 2
-     */
-    private Coordinates[] createT2Route() {
-        List<Coordinates> route = new LinkedList<>();
-        for (int i = 1; i < 9; i++)
-            route.add(new Coordinates(i, 0));
-        for (int i = 1; i < 6; i++)
-            route.add(new Coordinates(8, i));
-        for (int i = 9; i < 17; i++)
-            route.add(new Coordinates(i, 5));
-        for (int i = 4; i > 0; i--)
-            route.add(new Coordinates(16, i));
-
-        Collections.reverse(route);
-
-        return route.toArray(new Coordinates[0]);
-    }
-
-    /**
-     * Generates an array of coordinates specifying the route of train 3
-     */
-    private Coordinates[] createT3Route() {
-        List<Coordinates> route = new LinkedList<>();
-        for (int i = 15; i >= 8; i--)
-            route.add(new Coordinates(i, 10));
-        for (int i = 9; i >= 5; i--)
-            route.add(new Coordinates(8, i));
-        for (int i = 7; i >= 0; i--)
-            route.add(new Coordinates(i, 5));
-        for (int i = 4; i >= 1; i--)
-            route.add(new Coordinates(0, i));
-
-        return route.toArray(new Coordinates[0]);
-    }
-
-    /**
      * Generates a queue from a given array, specifying the initial order of the trains
      */
     public Queue<FieldTypes> setTrainOrder(FieldTypes[] trains) {
         Queue<FieldTypes> queue = new ConcurrentLinkedQueue<>();
         Collections.addAll(queue, trains);
         return queue;
+    }
+
+
+    /**
+     * Creates a new train by making a copy of the first TRAIN_LENGTH elements
+     * from the route array.
+     *
+     * @param route array of coordinates specifying the route of the train
+     * @return an array of coordinates specifying the wagons of the train
+     */
+    private Coordinates[] generateTrainFromRoute(Coordinates[] route) {
+        Coordinates[] train = new Coordinates[TRAIN_LENGTH];
+        for (int i = 0; i < TRAIN_LENGTH && i < route.length; i++)
+            train[i] = new Coordinates(route[i]);
+        return train;
     }
 }

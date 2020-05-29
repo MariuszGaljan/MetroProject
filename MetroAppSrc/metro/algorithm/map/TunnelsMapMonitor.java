@@ -1,9 +1,11 @@
 package metro.algorithm.map;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -267,5 +269,23 @@ public class TunnelsMapMonitor {
 
     public static int getHeight() {
         return TunnelsMap.HEIGHT;
+    }
+
+    public ReentrantLock getLock() {
+        return lock;
+    }
+
+    /**
+     * Returns array of coordinates of stations.
+     */
+    public Coordinates[] getStations() {
+        return TunnelsMap.stations;
+    }
+
+    /**
+     * Returns list of coordinates of entrances to all stations
+     */
+    public List<Coordinates> getStationsEntrances() {
+        return mapWrapper.getStationsEntrances();
     }
 }

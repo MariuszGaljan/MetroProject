@@ -63,6 +63,11 @@ public class StationsLock {
         Arrays.fill(entranceOccupied, false);
         // ... except for the starting entrances of the trains
         markInitialTrainEntrances();
+
+        // printing condition addresses
+//        for (int i = 0; i < coordinates.size(); i++) {
+//            System.out.println(coordinates.get(i) + ", " + entranceOccupied[i] + ", " + conditions.get(i));
+//        }
     }
 
     /**
@@ -95,7 +100,7 @@ public class StationsLock {
     public void signalStartingPoint(Coordinates startingPoint) {
         int i = getIndex(startingPoint);
         entranceOccupied[i] = false;
-        conditions.get(i).signalAll();
+        conditions.get(i).signal();
 //        lock.unlock();
     }
 
@@ -114,24 +119,29 @@ public class StationsLock {
      * @param station coordinates of a station.
      */
     private void createStationConditions(Coordinates station) {
-        int[] possibleVectors = {-1, 0, 1};
-        int row, col;
+        coordinates = mapWrapper.getStationsEntrances();
 
-        for (int vectorRow : possibleVectors) {
-            for (int vectorCol : possibleVectors) {
-                if (vectorRow != 0 || vectorCol != 0) {
-                    row = station.getRow() + vectorRow;
-                    col = station.getCol() + vectorCol;
+        for (Coordinates c : coordinates)
+            conditions.add(lock.newCondition());
 
-                    if (row >= 0 && row < TunnelsMap.HEIGHT)
-                        if (col >= 0 && col < TunnelsMap.WIDTH)
-                            if (tunnelsMap[row][col] != FieldTypes.WALL) {
-                                coordinates.add(new Coordinates(row, col));
-                                conditions.add(lock.newCondition());
-                            }
-                }
-            }
-        }
+//        int[] possibleVectors = {-1, 0, 1};
+//        int row, col;
+//
+//        for (int vectorRow : possibleVectors) {
+//            for (int vectorCol : possibleVectors) {
+//                if (vectorRow != 0 || vectorCol != 0) {
+//                    row = station.getRow() + vectorRow;
+//                    col = station.getCol() + vectorCol;
+//
+//                    if (row >= 0 && row < TunnelsMap.HEIGHT)
+//                        if (col >= 0 && col < TunnelsMap.WIDTH)
+//                            if (tunnelsMap[row][col] != FieldTypes.WALL) {
+//                                coordinates.add(new Coordinates(row, col));
+//                                conditions.add(lock.newCondition());
+//                            }
+//                }
+//            }
+//        }
     }
 
     /**

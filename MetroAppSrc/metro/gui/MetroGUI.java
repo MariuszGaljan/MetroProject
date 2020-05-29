@@ -1,11 +1,13 @@
 package metro.gui;
 
 import metro.algorithm.SimulationModel;
+import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
 import javax.swing.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -29,7 +31,18 @@ public class MetroGUI extends JFrame {
     private JComboBox<FieldTypes> train1Select;
     private JComboBox<FieldTypes> train2Select;
     private JComboBox<FieldTypes> train3Select;
-    private JPanel trainSelection;
+    private JPanel trainOrderSelection;
+    private JPanel newSimulationParameters;
+    private JPanel trainRouteSelection;
+    private JComboBox<Coordinates> train1Start;
+    private JComboBox<Coordinates> train1End;
+    private JPanel train1Route;
+    private JPanel train2Route;
+    private JComboBox<Coordinates> train2Start;
+    private JComboBox<Coordinates> train2End;
+    private JPanel train3Route;
+    private JComboBox<Coordinates> train3Start;
+    private JComboBox<Coordinates> train3End;
 
     /**
      * The simulation model of the metro
@@ -64,13 +77,14 @@ public class MetroGUI extends JFrame {
     private void createUIComponents() {
         FieldTypes[] initialTrainOrder = {FieldTypes.T1, FieldTypes.T2, FieldTypes.T3};
 
-        if (metro == null)
+        if (metro == null) {
             metro = new SimulationModel(initialTrainOrder);
-        if (tunnelsMapMonitor == null)
+        }
+        if (tunnelsMapMonitor == null) {
             tunnelsMapMonitor = metro.getMonitor();
+        }
         mapPanelType = new MapPanel(tunnelsMapMonitor);
         mapPanel = mapPanelType;
-
 
         train1Select = new JComboBox<>(initialTrainOrder);
         train1Select.setSelectedIndex(0);
@@ -78,6 +92,25 @@ public class MetroGUI extends JFrame {
         train2Select.setSelectedIndex(1);
         train3Select = new JComboBox<>(initialTrainOrder);
         train3Select.setSelectedIndex(2);
+
+        Coordinates[] stationsEntrances = tunnelsMapMonitor.getStationsEntrances().toArray(new Coordinates[0]);
+        Coordinates[] starts = metro.getRouteStarts();
+        Coordinates[] ends = metro.getRouteEnds();
+
+        train1Start = new JComboBox<>(stationsEntrances);
+        train1Start.setSelectedItem(starts[0]);
+        train1End = new JComboBox<>(stationsEntrances);
+        train1End.setSelectedItem(ends[0]);
+
+        train2Start = new JComboBox<>(stationsEntrances);
+        train2Start.setSelectedItem(starts[1]);
+        train2End = new JComboBox<>(stationsEntrances);
+        train2End.setSelectedItem(ends[1]);
+
+        train3Start = new JComboBox<>(stationsEntrances);
+        train3Start.setSelectedItem(starts[2]);
+        train3End = new JComboBox<>(stationsEntrances);
+        train3End.setSelectedItem(ends[2]);
     }
 
     private void addListeners() {

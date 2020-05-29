@@ -1,5 +1,8 @@
 package metro.algorithm.map;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Class holding the 2D array of the tunnel's map.
  * <p>
@@ -54,4 +57,46 @@ class TunnelsMap {
             {E, W, W, W, W, E, W, W, W, W, E},
             {E, E, E, E, E, E, E, E, E, E, E},
     };
+
+    /**
+     * Creates an array of tiles marked as empty adjacent to the all stations
+     *
+     * @return coordinates of tiles adjacent to all stations
+     */
+    public List<Coordinates> getStationsEntrances() {
+        List<Coordinates> stationsEntraces = new LinkedList<>();
+
+        for (Coordinates station : stations)
+            stationsEntraces.addAll(getStationEntrances(station));
+
+        return stationsEntraces;
+    }
+
+    /**
+     * Creates an array of tiles marked as empty adjacent to the given station (station's entrance)
+     *
+     * @param station coordinates of a station.
+     * @return coordinates of tiles adjacent to one station
+     */
+    private List<Coordinates> getStationEntrances(Coordinates station) {
+        List<Coordinates> stationEntrances = new LinkedList<>();
+        int[] possibleVectors = {-1, 0, 1};
+        int row, col;
+
+        for (int vectorRow : possibleVectors) {
+            for (int vectorCol : possibleVectors) {
+                if (vectorRow != 0 || vectorCol != 0) {
+                    row = station.getRow() + vectorRow;
+                    col = station.getCol() + vectorCol;
+
+                    if (row >= 0 && row < TunnelsMap.HEIGHT)
+                        if (col >= 0 && col < TunnelsMap.WIDTH)
+                            if (map[row][col] != FieldTypes.WALL) {
+                                stationEntrances.add(new Coordinates(row, col));
+                            }
+                }
+            }
+        }
+        return stationEntrances;
+    }
 }

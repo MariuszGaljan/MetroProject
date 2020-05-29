@@ -81,6 +81,7 @@ public class MapPanel extends JPanel {
         }
     }
 
+
     /**
      * Sets the g's color accordingly to the field's type
      *
