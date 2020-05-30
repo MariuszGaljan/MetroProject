@@ -106,11 +106,6 @@ public class SimulationModel {
         return monitor;
     }
 
-
-    public void setTrainOrder(FieldTypes[] trainOrder) {
-        modelParams.setTrainOrder(trainOrder);
-    }
-
     public int getNumberOfTrains() {
         return ModelParameters.NUMBER_OF_TRAINS;
     }

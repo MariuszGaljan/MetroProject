@@ -6,6 +6,8 @@ import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,6 +46,7 @@ public class MetroGUI extends JFrame {
     private JPanel train3Route;
     private JComboBox<Coordinates> train3Start;
     private JComboBox<Coordinates> train3End;
+    private JButton resetButton;
 
     /**
      * The simulation model of the metro
@@ -59,6 +62,9 @@ public class MetroGUI extends JFrame {
      * Used to manage the execution of the updateGUI thread.
      */
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
+
+    private FieldTypes[] trainOrder;
+    private Coordinates[][] routes;
 
     /**
      * Creates and paints the GUI.
@@ -85,6 +91,7 @@ public class MetroGUI extends JFrame {
         if (tunnelsMapMonitor == null) {
             tunnelsMapMonitor = metro.getMonitor();
         }
+
         mapPanelType = new MapPanel(tunnelsMapMonitor);
         mapPanel = mapPanelType;
 
@@ -113,6 +120,9 @@ public class MetroGUI extends JFrame {
         train3Start.setSelectedItem(starts[2]);
         train3End = new JComboBox<>(stationsEntrances);
         train3End.setSelectedItem(ends[2]);
+
+        trainOrder = initialTrainOrder;
+        routes = getRoutes();
     }
 
 
@@ -169,13 +179,32 @@ public class MetroGUI extends JFrame {
             }
 
         });
+
+        resetButton.addActionListener(e -> {
+            metro.end();
+            isRunning.set(false);
+            resetSimulation();
+            startPauseButton.setText("Launch simulation");
+            startPauseButton.setToolTipText("Starts the new simulation");
+
+            revalidate();
+            repaint();
+        });
     }
 
     /**
      * Creates new SimulationModel object based on current parameters
      */
     private void createNewSimulation() {
-        metro = new SimulationModel(getTrainOrder(), getRoutes());
+        trainOrder = getTrainOrder();
+        routes = getRoutes();
+        metro = new SimulationModel(trainOrder, routes);
+        tunnelsMapMonitor = metro.getMonitor();
+        mapPanelType.setTunnelsMapMonitor(tunnelsMapMonitor);
+    }
+
+    private void resetSimulation() {
+        metro = new SimulationModel(trainOrder, routes);
         tunnelsMapMonitor = metro.getMonitor();
         mapPanelType.setTunnelsMapMonitor(tunnelsMapMonitor);
     }
