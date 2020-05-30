@@ -40,6 +40,8 @@ ModelParameters {
     public Queue<FieldTypes> trainOrder;
 
     /**
+     * Initializes routes to the default values.
+     *
      * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
      *                   specifying the initial order of the trains
      */
@@ -59,6 +61,31 @@ ModelParameters {
 
         this.trainOrder = setTrainOrder(trainOrder);
     }
+
+    /**
+     * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
+     *                   specifying the initial order of the trains
+     * @param routes an array of Coordinates pairs, specifying each route's start and end
+     *               e.g. For train 1 route routes[0][0] = start, route[0][1] = end
+     *                    For train 2 route routes[1][0] = start, route[1][1] = end
+     */
+    public ModelParameters(FieldTypes[] trainOrder, Coordinates[][] routes) {
+        t1Route = generateRoute(routes[0][0], routes[0][1]);
+        t2Route = generateRoute(routes[1][0], routes[1][1]);
+        t3Route = generateRoute(routes[2][0], routes[2][1]);
+
+        t1Wagons = generateTrainFromRoute(t1Route);
+        t2Wagons = generateTrainFromRoute(t2Route);
+        t3Wagons = generateTrainFromRoute(t3Route);
+
+        trains = new Coordinates[NUMBER_OF_TRAINS][];
+        trains[0] = t1Wagons;
+        trains[1] = t2Wagons;
+        trains[2] = t3Wagons;
+
+        this.trainOrder = setTrainOrder(trainOrder);
+    }
+
 
     /**
      * Generates a route from [start, end] (inclusive both ways).

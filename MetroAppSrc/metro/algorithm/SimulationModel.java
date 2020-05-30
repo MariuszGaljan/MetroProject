@@ -26,6 +26,12 @@ public class SimulationModel {
     Train[] trains = new Train[ModelParameters.NUMBER_OF_TRAINS];
 
 
+    /**
+     * Initializes routes to the default values.
+     *
+     * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
+     *                   specifying the initial order of the trains
+     */
     public SimulationModel(FieldTypes[] trainOrder) {
         // here we specify the parameters of the simulation
         modelParams = new ModelParameters(trainOrder);
@@ -43,12 +49,37 @@ public class SimulationModel {
     }
 
     /**
+     * Initializes routes to the default values.
+     *
+     * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
+     *                   specifying the initial order of the trains
+     * @param routes     an array of Coordinates pairs, specifying each route's start and end
+     *                   e.g. For train 1 route routes[0][0] = start, route[0][1] = end
+     *                        For train 2 route routes[1][0] = start, route[1][1] = end
+     */
+    public SimulationModel(FieldTypes[] trainOrder, Coordinates[][] routes) {
+        // here we specify the parameters of the simulation
+        modelParams = new ModelParameters(trainOrder, routes);
+        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.trainOrder);
+
+        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Route);
+        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Route);
+        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.t3Wagons, modelParams.t3Route);
+
+        for (Thread t : trains)
+            t.start();
+
+        // the simulation starts as paused (that way the startButton implementation is simpler
+        pause();
+    }
+
+    /**
      * Ends the simulation by interrupting its thread.
-     * */
+     */
     public void end() {
         for (Thread t : trains)
-                if (t != null)
-                    t.interrupt();
+            if (t != null)
+                t.interrupt();
     }
 
     /**

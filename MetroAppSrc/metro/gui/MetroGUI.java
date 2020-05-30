@@ -7,7 +7,8 @@ import metro.algorithm.map.TunnelsMapMonitor;
 
 import javax.swing.*;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -26,7 +27,7 @@ public class MetroGUI extends JFrame {
      */
     private MapPanel mapPanelType;
     private JButton startPauseButton;
-    private JButton resetButton;
+    private JButton newSimButton;
 
     private JComboBox<FieldTypes> train1Select;
     private JComboBox<FieldTypes> train2Select;
@@ -63,7 +64,8 @@ public class MetroGUI extends JFrame {
      * Creates and paints the GUI.
      */
     public MetroGUI() {
-        setTitle("Metro App");
+        super();
+        setTheme();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(MainPanel);
         addListeners();
@@ -113,10 +115,11 @@ public class MetroGUI extends JFrame {
         train3End.setSelectedItem(ends[2]);
     }
 
+
     private void addListeners() {
         startPauseButton.addActionListener(e -> {
             if (startPauseButton.getText().equals("Launch simulation")) {
-                createNewSimulation();
+//                createNewSimulation();
                 System.out.println("Train order: " + Arrays.toString(getTrainOrder()));
                 metro.restart();
                 isRunning.set(true);
@@ -146,18 +149,25 @@ public class MetroGUI extends JFrame {
             }
         });
 
-        resetButton.addActionListener(e -> {
-            // first we stop the model
-            metro.end();
-            // then we stop the thread that's updating the map
-            isRunning.set(false);
-            createNewSimulation();
+        newSimButton.addActionListener(e -> {
+            if (!routesAreValid()) {
+                JOptionPane.showMessageDialog(this, "Every train has to have a different starting point");
+            } else {
+                // first we stop the model
+                metro.end();
+                // then we stop the thread that's updating the map
+                isRunning.set(false);
+                createNewSimulation();
 
-            startPauseButton.setText("Launch simulation");
-            startPauseButton.setToolTipText("Starts the new simulation");
+                startPauseButton.setText("Launch simulation");
+                startPauseButton.setToolTipText("Starts the new simulation");
 
-            revalidate();
-            repaint();
+                revalidate();
+                repaint();
+
+                JOptionPane.showMessageDialog(this, "New simulation created successfully");
+            }
+
         });
     }
 
@@ -165,10 +175,38 @@ public class MetroGUI extends JFrame {
      * Creates new SimulationModel object based on current parameters
      */
     private void createNewSimulation() {
-        metro = new SimulationModel(getTrainOrder());
+        metro = new SimulationModel(getTrainOrder(), getRoutes());
         tunnelsMapMonitor = metro.getMonitor();
         mapPanelType.setTunnelsMapMonitor(tunnelsMapMonitor);
     }
+
+    /**
+     * Checks if any two trains start from the same station entrance
+     *
+     * @return true if there are no duplicates, false otherwise
+     */
+    private boolean routesAreValid() {
+        Set<Coordinates> trainStarts = new HashSet<>();
+        trainStarts.add((Coordinates) train1Start.getSelectedItem());
+        trainStarts.add((Coordinates) train2Start.getSelectedItem());
+        trainStarts.add((Coordinates) train3Start.getSelectedItem());
+
+        return trainStarts.size() == metro.getNumberOfTrains();
+    }
+
+
+    private Coordinates[][] getRoutes() {
+        Coordinates[][] routes = new Coordinates[metro.getNumberOfTrains()][2];
+        routes[0][0] = (Coordinates) train1Start.getSelectedItem();
+        routes[0][1] = (Coordinates) train1End.getSelectedItem();
+        routes[1][0] = (Coordinates) train2Start.getSelectedItem();
+        routes[1][1] = (Coordinates) train2End.getSelectedItem();
+        routes[2][0] = (Coordinates) train3Start.getSelectedItem();
+        routes[2][1] = (Coordinates) train3End.getSelectedItem();
+
+        return routes;
+    }
+
 
     /**
      * Reads the initial order of the trains and returns it as an array
@@ -191,5 +229,13 @@ public class MetroGUI extends JFrame {
         mapPanel.revalidate();
         mapPanel.repaint();
         tunnelsMapMonitor.endPainting();
+    }
+
+    private void setTheme() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
     }
 }
