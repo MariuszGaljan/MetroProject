@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -51,6 +50,9 @@ public class TunnelsMapMonitor {
      * A condition used to ensure that only one train is moving at any time
      */
     Condition supervisor = lock.newCondition();
+    /**
+     * Queue specifying the initial order of the trains.
+     */
     Queue<FieldTypes> trainQueue;
 
 
@@ -118,14 +120,12 @@ public class TunnelsMapMonitor {
             return;
         }
 
-        while (trainQueue.peek() != trainType) {
+        while (trainQueue.peek() != trainType || stationsLock.isThreadIsWaiting()) {
             // if it's not this train's turn, we have to signal the next waiting train
             // so it checks if it's maybe its turn
             supervisor.signal();
             supervisor.await();
         }
-        Thread.sleep(1);
-        lock.lock();
 
         // once it's this train's turn, we remove it from the queue
         trainQueue.poll();
@@ -166,7 +166,7 @@ public class TunnelsMapMonitor {
      * Adds the train that reached its destination to the end of the queue.
      *
      * @param start     coordinates of the starting point to unlock
-     * @param trainType one of the T1, T2, T3 values of enum FieldTypesain
+     * @param trainType one of the T1, T2, T3 values of enum FieldTypes
      */
     private void endCourse(Coordinates start, FieldTypes trainType) {
         trainQueue.add(trainType);
@@ -183,6 +183,8 @@ public class TunnelsMapMonitor {
      * @param wagons           array of Coordinates defining the individual wagons of the train.
      * @param nextHeadPosition coordinates the 0th elem of wagons array will move to
      * @param trainType        one of the T1, T2, T3 values of enum FieldTypes
+     * @throws InterruptedException the function is synchronized with a reading mechanism, so it may wait
+     *                              to acquire the writer synchronization tool
      */
     private void moveTrain(Coordinates[] wagons, Coordinates nextHeadPosition, FieldTypes trainType)
             throws InterruptedException {
@@ -192,8 +194,8 @@ public class TunnelsMapMonitor {
         Coordinates oldPosition;
 
         eraseTrain(wagons);
+        // we shift every wagons position by one
         for (Coordinates wagon : wagons) {
-            // we move every wagon one by one to the next position
             oldPosition = new Coordinates(wagon);
             wagon.moveTo(nextPosition);
             nextPosition = oldPosition;
@@ -239,7 +241,8 @@ public class TunnelsMapMonitor {
 
 
     /**
-     * Acquires the synchronization tools
+     * Acquires the synchronization tools.
+     * After reading you should invoke endPainting().
      */
     public void beginPainting() {
         try {
@@ -249,6 +252,10 @@ public class TunnelsMapMonitor {
         }
     }
 
+    /**
+     * Releases the synchronization tools.
+     * Should be invoked after beginPainting(), once the reading is done.
+     */
     public void endPainting() {
         writeSem.release();
     }
@@ -269,17 +276,6 @@ public class TunnelsMapMonitor {
 
     public static int getHeight() {
         return TunnelsMap.HEIGHT;
-    }
-
-    public ReentrantLock getLock() {
-        return lock;
-    }
-
-    /**
-     * Returns array of coordinates of stations.
-     */
-    public Coordinates[] getStations() {
-        return TunnelsMap.stations;
     }
 
     /**

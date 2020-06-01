@@ -55,7 +55,7 @@ public class SimulationModel {
      *                   specifying the initial order of the trains
      * @param routes     an array of Coordinates pairs, specifying each route's start and end
      *                   e.g. For train 1 route routes[0][0] = start, route[0][1] = end
-     *                        For train 2 route routes[1][0] = start, route[1][1] = end
+     *                   For train 2 route routes[1][0] = start, route[1][1] = end
      */
     public SimulationModel(FieldTypes[] trainOrder, Coordinates[][] routes) {
         // here we specify the parameters of the simulation
@@ -101,14 +101,20 @@ public class SimulationModel {
 
     /**
      * Returns the monitor attached to this model.
+     *
+     * @return Monitor of the tunnel's map.
      */
     public TunnelsMapMonitor getMonitor() {
         return monitor;
     }
 
+    /**
+     * Returns number of trains in the simulation.
+     */
     public int getNumberOfTrains() {
         return ModelParameters.NUMBER_OF_TRAINS;
     }
+
 
     public Coordinates[] getRouteStarts() {
         Coordinates[] starts = new Coordinates[ModelParameters.NUMBER_OF_TRAINS];
@@ -117,6 +123,7 @@ public class SimulationModel {
         starts[2] = modelParams.t3Route[0];
         return starts;
     }
+
 
     public Coordinates[] getRouteEnds() {
         Coordinates[] ends = new Coordinates[ModelParameters.NUMBER_OF_TRAINS];

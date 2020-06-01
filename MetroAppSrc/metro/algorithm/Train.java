@@ -5,8 +5,6 @@ import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
-import java.util.Arrays;
-
 /**
  * Class representing a concurrent train in the metro
  */
@@ -55,12 +53,10 @@ public class Train extends Thread {
         this.tunnelsMap = monitor;
         this.trainType = trainType;
         this.route = route;
-
     }
 
     @Override
     public void run() {
-        int i = 0;
         while (true) {
             try {
                 // if the program is paused, the train has to wait
@@ -71,8 +67,6 @@ public class Train extends Thread {
                     }
                 }
                 tunnelsMap.travel(route, wagons, trainType, moveForward);
-
-                i++;
                 // after getting to the destination, the train turns around and goes back
                 moveForward = !moveForward;
             } catch (InterruptedException e) {
@@ -98,13 +92,5 @@ public class Train extends Thread {
             isPaused = false;
             startPauseMonitor.notify();
         }
-    }
-
-    public Coordinates getRouteEnd() {
-        return route[route.length - 1];
-    }
-
-    public Coordinates getRouteStart() {
-        return route[0];
     }
 }

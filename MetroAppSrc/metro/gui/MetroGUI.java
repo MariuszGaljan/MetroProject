@@ -6,8 +6,6 @@ import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,23 +27,33 @@ public class MetroGUI extends JFrame {
      */
     private MapPanel mapPanelType;
     private JButton startPauseButton;
-    private JButton newSimButton;
 
-    private JComboBox<FieldTypes> train1Select;
-    private JComboBox<FieldTypes> train2Select;
-    private JComboBox<FieldTypes> train3Select;
-    private JPanel trainOrderSelection;
     private JPanel newSimulationParameters;
+    private JButton newSimButton;
+    /**
+     * combo box used for the initial train order selection
+     */
+    private JComboBox<FieldTypes> train1Select, train2Select, train3Select;
+    private JPanel trainOrderSelection;
     private JPanel trainRouteSelection;
-    private JComboBox<Coordinates> train1Start;
-    private JComboBox<Coordinates> train1End;
     private JPanel train1Route;
+    /**
+     * Box used to specify one of the ends of the route of train T1
+     */
+    private JComboBox<Coordinates> train1Start, train1End;
     private JPanel train2Route;
-    private JComboBox<Coordinates> train2Start;
-    private JComboBox<Coordinates> train2End;
+    /**
+     * Box used to specify one of the ends of the route of train T2
+     */
+    private JComboBox<Coordinates> train2Start, train2End;
     private JPanel train3Route;
-    private JComboBox<Coordinates> train3Start;
-    private JComboBox<Coordinates> train3End;
+    /**
+     * Box used to specify one of the ends of the route of train T3
+     */
+    private JComboBox<Coordinates> train3Start, train3End;
+    /**
+     * Button used to reset the simulation
+     */
     private JButton resetButton;
 
     /**
@@ -194,6 +202,7 @@ public class MetroGUI extends JFrame {
 
     /**
      * Creates new SimulationModel object based on current parameters
+     * Updates attributes of the gui.
      */
     private void createNewSimulation() {
         trainOrder = getTrainOrder();
@@ -203,6 +212,9 @@ public class MetroGUI extends JFrame {
         mapPanelType.setTunnelsMapMonitor(tunnelsMapMonitor);
     }
 
+    /**
+     * Resets current simulation to its initial state.
+     */
     private void resetSimulation() {
         metro = new SimulationModel(trainOrder, routes);
         tunnelsMapMonitor = metro.getMonitor();

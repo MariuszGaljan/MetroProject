@@ -2,7 +2,6 @@ package metro.algorithm.map;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -20,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class StationsLock {
     /**
      * Instance of a package-private class TunnelsMap
-     * */
+     */
     TunnelsMap mapWrapper;
     /**
      * the map is defined in the TunnelsMap package-private class
@@ -46,28 +45,30 @@ public class StationsLock {
     ReentrantLock lock;
 
     /**
-     * @param stations an array of stations' coordinates
-     * @param lock     a lock used in the synchronization process
+     * Used to stop the current thread execution
+     * when a thread is waiting for an entrance that's about to be released
+     */
+    boolean threadIsWaiting = false;
+
+    /**
+     * @param mapWrapper reference to the TunnelsMap instance
+     * @param stations   an array of stations' coordinates
+     * @param lock       a lock used in the synchronization process
      */
     public StationsLock(TunnelsMap mapWrapper, Coordinates[] stations, ReentrantLock lock) {
         this.mapWrapper = mapWrapper;
         this.tunnelsMap = mapWrapper.map;
         this.lock = lock;
-        coordinates = new LinkedList<>();
-        conditions = new ArrayList<>();
-        for (Coordinates station : stations) {
-            createStationConditions(station);
-        }
-        // we initialize all boolean occupied values to false...
+        createStationConditions();
+        // we initialize all entrances as not occupied...
         entranceOccupied = new boolean[conditions.size()];
         Arrays.fill(entranceOccupied, false);
         // ... except for the starting entrances of the trains
         markInitialTrainEntrances();
 
-        // printing condition addresses
-//        for (int i = 0; i < coordinates.size(); i++) {
-//            System.out.println(coordinates.get(i) + ", " + entranceOccupied[i] + ", " + conditions.get(i));
-//        }
+//        // printing all entrances
+//        for (int i = 0; i < entranceOccupied.length; i++)
+//            printEntrance(i);
     }
 
     /**
@@ -77,19 +78,19 @@ public class StationsLock {
      * @param destination coordinates of the destination to occupy
      * @param supervisor  a condition that is signaled if the destination is locked.
      *                    Used to launch the next train in case this one can't move.
+     * @throws InterruptedException a thread may wait for the entrance to be released
      */
     public void lockDestination(Coordinates destination, Condition supervisor) throws InterruptedException {
         lock.lock();
         int i = getIndex(destination);
 
-
         while (entranceOccupied[i]) {
             System.out.print(Thread.currentThread().getName() + ": Entrance " + coordinates.get(i) + " is taken. ");
             System.out.println("Signaling next train");
+//            printEntrance(i);
             supervisor.signal();
             conditions.get(i).await();
         }
-
         entranceOccupied[i] = true;
     }
 
@@ -100,9 +101,23 @@ public class StationsLock {
     public void signalStartingPoint(Coordinates startingPoint) {
         int i = getIndex(startingPoint);
         entranceOccupied[i] = false;
+        threadIsWaiting = lock.hasWaiters(conditions.get(i));
+//        printEntrance(i);
         conditions.get(i).signal();
 //        lock.unlock();
     }
+
+
+    /**
+     * Checks if there is a thread that's waiting for an entrance that was released.
+     *
+     * @return true when a thread is ready to travel,
+     * false otherwise
+     */
+    public boolean isThreadIsWaiting() {
+        return threadIsWaiting;
+    }
+
 
     /**
      * Return the index of coordinates in the coordinates list.
@@ -113,35 +128,16 @@ public class StationsLock {
         return this.coordinates.indexOf(coordinates);
     }
 
+
     /**
      * Creates a condition for every tile marked as empty adjacent to the given station (station's entrance)
-     *
-     * @param station coordinates of a station.
      */
-    private void createStationConditions(Coordinates station) {
+    private void createStationConditions() {
         coordinates = mapWrapper.getStationsEntrances();
+        conditions = new ArrayList<>();
 
         for (Coordinates c : coordinates)
             conditions.add(lock.newCondition());
-
-//        int[] possibleVectors = {-1, 0, 1};
-//        int row, col;
-//
-//        for (int vectorRow : possibleVectors) {
-//            for (int vectorCol : possibleVectors) {
-//                if (vectorRow != 0 || vectorCol != 0) {
-//                    row = station.getRow() + vectorRow;
-//                    col = station.getCol() + vectorCol;
-//
-//                    if (row >= 0 && row < TunnelsMap.HEIGHT)
-//                        if (col >= 0 && col < TunnelsMap.WIDTH)
-//                            if (tunnelsMap[row][col] != FieldTypes.WALL) {
-//                                coordinates.add(new Coordinates(row, col));
-//                                conditions.add(lock.newCondition());
-//                            }
-//                }
-//            }
-//        }
     }
 
     /**
@@ -155,5 +151,12 @@ public class StationsLock {
                 entranceOccupied[i] = true;
             }
         }
+    }
+
+    /**
+     * Prints the given entrance to the standard output.
+     */
+    private void printEntrance(int i) {
+        System.out.println(coordinates.get(i) + ", " + entranceOccupied[i] + ", " + conditions.get(i));
     }
 }

@@ -4,9 +4,10 @@ import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
-import javax.annotation.processing.SupportedSourceVersion;
-import java.awt.image.MemoryImageSource;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class
@@ -30,13 +31,22 @@ ModelParameters {
     };
 
 
-    public Coordinates[] t1Wagons;
-    public Coordinates[] t2Wagons;
-    public Coordinates[] t3Wagons;
+    public Coordinates[] t1Wagons, t2Wagons, t3Wagons;
+
+    /**
+     * Array of trains.
+     * Each train is an array of coordinates of its wagons.
+     */
     public Coordinates[][] trains;
 
+    /**
+     * An array of coordinates specifying the route of the train.
+     */
     public Coordinates[] t1Route, t2Route, t3Route;
 
+    /**
+     * Specifying the initial order of the trains
+     */
     public Queue<FieldTypes> trainOrder;
 
     /**
@@ -65,9 +75,9 @@ ModelParameters {
     /**
      * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
      *                   specifying the initial order of the trains
-     * @param routes an array of Coordinates pairs, specifying each route's start and end
-     *               e.g. For train 1 route routes[0][0] = start, route[0][1] = end
-     *                    For train 2 route routes[1][0] = start, route[1][1] = end
+     * @param routes     an array of Coordinates pairs, specifying each route's start and end
+     *                   e.g. For train 1 route routes[0][0] = start, route[0][1] = end
+     *                   For train 2 route routes[1][0] = start, route[1][1] = end
      */
     public ModelParameters(FieldTypes[] trainOrder, Coordinates[][] routes) {
         t1Route = generateRoute(routes[0][0], routes[0][1]);
