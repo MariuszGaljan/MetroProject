@@ -52,10 +52,9 @@ public class StationsLock {
 
     /**
      * @param mapWrapper reference to the TunnelsMap instance
-     * @param stations   an array of stations' coordinates
      * @param lock       a lock used in the synchronization process
      */
-    public StationsLock(TunnelsMap mapWrapper, Coordinates[] stations, ReentrantLock lock) {
+    public StationsLock(TunnelsMap mapWrapper, ReentrantLock lock) {
         this.mapWrapper = mapWrapper;
         this.tunnelsMap = mapWrapper.map;
         this.lock = lock;

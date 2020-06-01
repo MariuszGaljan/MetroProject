@@ -78,7 +78,7 @@ public class TunnelsMapMonitor {
             tunnelsMap[station.getRow()][station.getCol()] = FieldTypes.STATION;
 
         // initializing the locks for every station's entrance (side)
-        stationsLock = new StationsLock(mapWrapper, stations, lock);
+        stationsLock = new StationsLock(mapWrapper, lock);
     }
 
     /**
