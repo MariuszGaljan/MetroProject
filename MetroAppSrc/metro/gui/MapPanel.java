@@ -20,8 +20,14 @@ public class MapPanel extends JPanel {
      */
     private final int tileCols = 11;
 
-    private final int preferredWidth = 816;
-    private final int preferredHeight = 605;
+    private final int preferredWidth = 856;
+    private final int preferredHeight = 652;
+
+    private final int rowLabelWidth = 20;
+    private final int colLabelHeight = 20;
+
+    private int tileWidth;
+    private int tileHeight;
 
     /**
      * Width of the panel
@@ -45,7 +51,7 @@ public class MapPanel extends JPanel {
 
     /**
      * Sets the monitor and repaints the JPanel
-     * */
+     */
     public void setTunnelsMapMonitor(TunnelsMapMonitor monitor) {
         this.tunnelsMapMonitor = monitor;
         revalidate();
@@ -69,16 +75,29 @@ public class MapPanel extends JPanel {
         g.setColor(Color.DARK_GRAY);
         g.fillRect(0, 0, width, height);
 
-        int tileWidth = width / tileCols;
-        int tileHeight = height / tileRows;
+        tileWidth = (width - rowLabelWidth) / tileCols;
+        tileHeight = (height - colLabelHeight) / tileRows;
+
+        drawLabels(g);
 
         for (int i = 0; i < tileCols; i++) {
             for (int j = 0; j < tileRows; j++) {
                 FieldTypes field = tunnelsMapMonitor.getField(new Coordinates(j, i));
                 setTileColor(g, field);
-                g.fillRect(spacing + i * tileWidth, spacing + j * tileHeight, tileWidth - spacing * 2, tileHeight - spacing * 2);
+                g.fillRect(spacing + i * tileWidth + rowLabelWidth, spacing + j * tileHeight + colLabelHeight, tileWidth - spacing * 2, tileHeight - spacing * 2);
             }
         }
+    }
+
+    private void drawLabels(Graphics g) {
+        g.setColor(Color.WHITE);
+        // drawing row labels
+        for (int i = 1; i <= tileRows; i++)
+            g.drawString("" + (i - 1), 1, i * tileHeight - 2 * spacing + colLabelHeight);
+        // drawing column labels
+        g.setColor(Color.WHITE);
+        for (int i = 1; i <= tileCols; i++)
+            g.drawString("" + (i - 1), i * tileWidth - spacing - rowLabelWidth, colLabelHeight);
     }
 
 
