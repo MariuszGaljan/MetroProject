@@ -6,9 +6,7 @@ import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
 import javax.swing.*;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -168,9 +166,7 @@ public class MetroGUI extends JFrame {
         });
 
         newSimButton.addActionListener(e -> {
-            if (!routesAreValid()) {
-                JOptionPane.showMessageDialog(this, "Every train has to have a different starting point");
-            } else {
+            if (routesAreValid()) {
                 // first we stop the model
                 metro.end();
                 // then we stop the thread that's updating the map
@@ -223,16 +219,41 @@ public class MetroGUI extends JFrame {
 
     /**
      * Checks if any two trains start from the same station entrance
+     * or if trains are blocking each other by having same, but opposite routes
      *
      * @return true if there are no duplicates, false otherwise
      */
     private boolean routesAreValid() {
-        Set<Coordinates> trainStarts = new HashSet<>();
-        trainStarts.add((Coordinates) train1Start.getSelectedItem());
-        trainStarts.add((Coordinates) train2Start.getSelectedItem());
-        trainStarts.add((Coordinates) train3Start.getSelectedItem());
+        // first we check if every train has its own starting entrance
+        Set<Coordinates> trainStartsSet = new HashSet<>();
+        trainStartsSet.add((Coordinates) train1Start.getSelectedItem());
+        trainStartsSet.add((Coordinates) train2Start.getSelectedItem());
+        trainStartsSet.add((Coordinates) train3Start.getSelectedItem());
 
-        return trainStarts.size() == metro.getNumberOfTrains();
+        if (trainStartsSet.size() != metro.getNumberOfTrains()) {
+            JOptionPane.showMessageDialog(this, "Every train has to have a different starting point");
+            return false;
+        }
+
+        Coordinates[] trainStarts = trainStartsSet.toArray(new Coordinates[0]);
+
+        List<Coordinates> trainEndsList = new LinkedList<>();
+        trainEndsList.add((Coordinates) train1End.getSelectedItem());
+        trainEndsList.add((Coordinates) train2End.getSelectedItem());
+        trainEndsList.add((Coordinates) train3End.getSelectedItem());
+        Coordinates[] trainEnds = trainEndsList.toArray(new Coordinates[0]);
+
+        for (int i = 0; i < trainStarts.length; i++) {
+            Coordinates start = trainStarts[i];
+            Coordinates end = trainEnds[i];
+            for (int j = i + 1; j < trainStarts.length; j++) {
+                if (start == trainEnds[j] && trainStarts[j] == end) {
+                    JOptionPane.showMessageDialog(this, "Trains can't block each other");
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 

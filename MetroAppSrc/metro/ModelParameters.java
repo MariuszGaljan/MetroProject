@@ -26,9 +26,9 @@ ModelParameters {
      */
     public Coordinates[] stations = {
             new Coordinates(0, 0),
+            new Coordinates(0, 10),
             new Coordinates(16, 0),
-            new Coordinates(16, 10),
-            new Coordinates(0, 10)
+            new Coordinates(16, 10)
     };
 
 

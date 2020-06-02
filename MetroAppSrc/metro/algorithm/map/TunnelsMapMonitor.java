@@ -111,7 +111,7 @@ public class TunnelsMapMonitor {
      * @param trainType   enum value defining the current train
      * @throws InterruptedException the thread can wait on a Condition
      */
-    private void beginCourse(Coordinates destination, FieldTypes trainType) throws InterruptedException {
+    public void beginCourse(Coordinates destination, FieldTypes trainType) throws InterruptedException {
         lock.lock();
 
         // if the queue is empty, it means all the trains are blocking each other
@@ -141,7 +141,7 @@ public class TunnelsMapMonitor {
      * @param trainType   one of the T1, T2, T3 values of enum FieldTypes
      * @param moveForward boolean value defining whether the train starts from route[0] or the last elem of route
      */
-    private void moveToNextStation(Coordinates[] route, Coordinates[] wagons, FieldTypes trainType, boolean moveForward)
+    public void moveToNextStation(Coordinates[] route, Coordinates[] wagons, FieldTypes trainType, boolean moveForward)
             throws InterruptedException {
         if (moveForward) {
             for (Coordinates nextStep : route) {
@@ -168,7 +168,7 @@ public class TunnelsMapMonitor {
      * @param start     coordinates of the starting point to unlock
      * @param trainType one of the T1, T2, T3 values of enum FieldTypes
      */
-    private void endCourse(Coordinates start, FieldTypes trainType) {
+    public void endCourse(Coordinates start, FieldTypes trainType) {
         trainQueue.add(trainType);
         stationsLock.signalStartingPoint(start);
         lock.unlock();

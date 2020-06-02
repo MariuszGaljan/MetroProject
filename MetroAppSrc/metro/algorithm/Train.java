@@ -66,7 +66,18 @@ public class Train extends Thread {
                         startPauseMonitor.wait();
                     }
                 }
-                tunnelsMap.travel(route, wagons, trainType, moveForward);
+
+                // first we set start and end point accordingly to the direction
+                Coordinates start = moveForward ? route[0] : route[route.length - 1];
+                Coordinates end = moveForward ? route[route.length - 1] : route[0];
+
+                try {
+                    tunnelsMap.beginCourse(end, trainType);
+                    tunnelsMap.moveToNextStation(route, wagons, trainType, moveForward);
+                } finally {
+                    tunnelsMap.endCourse(start, trainType);
+                }
+
                 // after getting to the destination, the train turns around and goes back
                 moveForward = !moveForward;
             } catch (InterruptedException e) {
