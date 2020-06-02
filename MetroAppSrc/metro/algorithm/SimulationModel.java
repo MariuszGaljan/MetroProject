@@ -1,6 +1,5 @@
 package metro.algorithm;
 
-import metro.ModelParameters;
 import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;

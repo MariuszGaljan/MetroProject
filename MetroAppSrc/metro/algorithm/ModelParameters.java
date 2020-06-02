@@ -1,4 +1,4 @@
-package metro;
+package metro.algorithm;
 
 import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;

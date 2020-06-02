@@ -1,3 +1,5 @@
+package metro;
+
 import metro.gui.MetroGUI;
 
 /**
