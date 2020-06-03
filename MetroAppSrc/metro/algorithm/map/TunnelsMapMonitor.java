@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Class used to access the map of the tunnels.
@@ -30,6 +32,8 @@ public class TunnelsMapMonitor {
      * Semaphore used to synchronize travelling trains with the GUI map representation
      */
     Semaphore writeSem = new Semaphore(0);
+
+    ReadWriteLock ioLock = new ReentrantReadWriteLock();
 
     /**
      * The lock used for synchronization of the trains
@@ -115,26 +119,43 @@ public class TunnelsMapMonitor {
     /**
      * Procedure moving the train via the route to its destination
      *
-     * @param route       array of Coordinates defining the route the train is supposed to take
-     * @param wagons      array of Coordinates defining the individual wagons of the train.
-     * @param trainType   one of the T1, T2, T3 values of enum FieldTypes
-     * @param moveForward boolean value defining whether the train starts from route[0] or the last elem of route
+     * @param start     coordinates of current crossing
+     * @param end       coordinates of destination crossing
+     * @param wagons    array of Coordinates defining the individual wagons of the train.
+     * @param trainType one of the T1, T2, T3 values of enum FieldTypes
      * @throws InterruptedException this method uses sleep to visualize the transition in GUI
      */
-    public void moveToNextStation(Coordinates[] route, Coordinates[] wagons, FieldTypes trainType, boolean moveForward)
+    public void moveToNextCrossing(Coordinates start, Coordinates end, Coordinates[] wagons, FieldTypes trainType)
             throws InterruptedException {
-        if (moveForward) {
-            for (Coordinates nextStep : route) {
-                moveTrain(wagons, nextStep, trainType);
-                // I used sleep here to make the transition visible in the GUI
-                Thread.sleep(200);
+        boolean horizontal = start.getRow() == end.getRow();
+
+        if (horizontal) {
+            if (start.getCol() < end.getCol()) {
+                // left to right
+                for (int i = start.getCol(); i < end.getCol(); i++) {
+                    moveTrain(wagons, new Coordinates(start.getRow(), i), trainType);
+                    Thread.sleep(200);
+                }
+            } else {
+                // right to left
+                for (int i = start.getCol(); i > end.getCol(); i--) {
+                    moveTrain(wagons, new Coordinates(start.getRow(), i), trainType);
+                    Thread.sleep(200);
+                }
             }
         } else {
-            Coordinates nextStep;
-            for (int i = route.length - 1; i >= 0; i--) {
-                nextStep = route[i];
-                moveTrain(wagons, nextStep, trainType);
-                Thread.sleep(200);
+            if (start.getRow() < end.getRow()) {
+                // top to bottom
+                for (int i = start.getRow(); i < end.getRow(); i++) {
+                    moveTrain(wagons, new Coordinates(i, start.getCol()), trainType);
+                    Thread.sleep(200);
+                }
+            } else {
+                // bottom to top
+                for (int i = start.getRow(); i > end.getRow(); i--) {
+                    moveTrain(wagons, new Coordinates(i, start.getCol()), trainType);
+                    Thread.sleep(200);
+                }
             }
         }
     }
@@ -163,26 +184,25 @@ public class TunnelsMapMonitor {
      * @param wagons           array of Coordinates defining the individual wagons of the train.
      * @param nextHeadPosition coordinates the 0th elem of wagons array will move to
      * @param trainType        one of the T1, T2, T3 values of enum FieldTypes
-     * @throws InterruptedException the function is synchronized with a reading mechanism, so it may wait
-     *                              to acquire the writer synchronization tool
      */
-    private void moveTrain(Coordinates[] wagons, Coordinates nextHeadPosition, FieldTypes trainType)
-            throws InterruptedException {
-        writeSem.acquire();
+    private void moveTrain(Coordinates[] wagons, Coordinates nextHeadPosition, FieldTypes trainType) {
+        ioLock.writeLock().lock();
 
-        Coordinates nextPosition = nextHeadPosition;
-        Coordinates oldPosition;
+        try {
+            Coordinates nextPosition = nextHeadPosition;
+            Coordinates oldPosition;
 
-        eraseTrain(wagons);
-        // we shift every wagons position by one
-        for (Coordinates wagon : wagons) {
-            oldPosition = new Coordinates(wagon);
-            wagon.moveTo(nextPosition);
-            nextPosition = oldPosition;
+            eraseTrain(wagons);
+            // we shift every wagons position by one
+            for (Coordinates wagon : wagons) {
+                oldPosition = new Coordinates(wagon);
+                wagon.moveTo(nextPosition);
+                nextPosition = oldPosition;
+            }
+            markTrain(wagons, trainType);
+        } finally {
+            ioLock.writeLock().unlock();
         }
-        markTrain(wagons, trainType);
-
-        readSem.release();
     }
 
     /**
@@ -225,11 +245,7 @@ public class TunnelsMapMonitor {
      * After reading you should invoke endPainting().
      */
     public void beginPainting() {
-        try {
-            readSem.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        ioLock.readLock().lock();
     }
 
     /**
@@ -237,7 +253,7 @@ public class TunnelsMapMonitor {
      * Should be invoked after beginPainting(), once the reading is done.
      */
     public void endPainting() {
-        writeSem.release();
+        ioLock.readLock().unlock();
     }
 
     /**

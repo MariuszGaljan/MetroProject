@@ -5,8 +5,6 @@ import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
-import java.util.Arrays;
-
 /**
  * Class representing a concurrent train in the metro
  */
@@ -31,10 +29,10 @@ public class Train extends Thread {
     /**
      * The route of this train.
      * The train moves forward and backward along this road.
+     * The road is defined by the crossings the train has to pass through
      */
     private final Coordinates[] route;
 
-    private final Coordinates[] crossings;
     /**
      * A variable defining current direction the train is headed to.
      */
@@ -51,13 +49,12 @@ public class Train extends Thread {
      * @param wagons    array of Coordinates defining the individual wagons of the train.
      * @param route     array of Coordinates defining the route the train is supposed to take
      */
-    public Train(TunnelsMapMonitor monitor, FieldTypes trainType, Coordinates[] wagons, Coordinates[] route, Coordinates[] crossings) {
+    public Train(TunnelsMapMonitor monitor, FieldTypes trainType, Coordinates[] wagons, Coordinates[] route) {
         super(trainType.toString());
         this.wagons = wagons;
         this.tunnelsMap = monitor;
         this.trainType = trainType;
         this.route = route;
-        this.crossings = crossings;
     }
 
     @Override
@@ -72,15 +69,12 @@ public class Train extends Thread {
                     }
                 }
 
-                // first we set start and end point accordingly to the direction
-                Coordinates start = moveForward ? route[0] : route[route.length - 1];
-                Coordinates end = moveForward ? route[route.length - 1] : route[0];
-
-                try {
-                    tunnelsMap.beginCourse(end, trainType);
-                    tunnelsMap.moveToNextStation(route, wagons, trainType, moveForward);
-                } finally {
-                    tunnelsMap.endCourse(start, trainType);
+                if (moveForward) {
+                    for (int i = 0; i < route.length - 1; i++)
+                        tunnelsMap.moveToNextCrossing(route[i], route[i + 1], wagons, trainType);
+                } else {
+                    for (int i = route.length - 1; i > 0; i--)
+                        tunnelsMap.moveToNextCrossing(route[i], route[i - 1], wagons, trainType);
                 }
 
                 // after getting to the destination, the train turns around and goes back

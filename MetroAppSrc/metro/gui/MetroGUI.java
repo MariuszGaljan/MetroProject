@@ -288,9 +288,12 @@ public class MetroGUI extends JFrame {
      */
     public void updateGUI() {
         tunnelsMapMonitor.beginPainting();
-        mapPanel.revalidate();
-        mapPanel.repaint();
-        tunnelsMapMonitor.endPainting();
+        try {
+            mapPanel.revalidate();
+            mapPanel.repaint();
+        } finally {
+            tunnelsMapMonitor.endPainting();
+        }
     }
 
     private void setTheme() {
