@@ -29,6 +29,8 @@ public class Coordinates {
 
     /**
      * Returns the row coordinate of this point
+     *
+     * @return value of the row index
      */
     public int getRow() {
         return row;
@@ -36,6 +38,8 @@ public class Coordinates {
 
     /**
      * Returns the column coordinate of this point
+     *
+     * @return value of the column index
      */
     public int getCol() {
         return col;

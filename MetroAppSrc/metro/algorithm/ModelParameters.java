@@ -10,9 +10,22 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Class used to specify parameters of the metro simulation:
+ * - trains' wagons
+ * - trains' routes
+ * - initial order
+ * - stations
+ *
+ * @see Coordinates
+ * @see FieldTypes
+ */
 public class
 ModelParameters {
     public static final int NUMBER_OF_TRAINS = 3;
+    /**
+     * Number of wagons in each train
+     */
     public static final int TRAIN_LENGTH = 3;
 
     /**
@@ -203,6 +216,9 @@ ModelParameters {
 
     /**
      * Generates a queue from a given array, specifying the initial order of the trains
+     *
+     * @param trains array of FieldTypes' T1, T2, T3 values
+     * @return queue specifying the initial order of trains
      */
     public Queue<FieldTypes> setTrainOrder(FieldTypes[] trains) {
         Queue<FieldTypes> queue = new ConcurrentLinkedQueue<>();

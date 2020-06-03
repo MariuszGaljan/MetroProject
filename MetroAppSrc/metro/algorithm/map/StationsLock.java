@@ -96,6 +96,8 @@ public class StationsLock {
     /**
      * Marks the starting point as not occupied and signals the trains waiting for it to be released.
      * The lock should be released manually
+     *
+     * @param startingPoint coordinates of the entrance to be released
      */
     public void signalStartingPoint(Coordinates startingPoint) {
         int i = getIndex(startingPoint);

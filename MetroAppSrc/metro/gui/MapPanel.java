@@ -23,7 +23,13 @@ public class MapPanel extends JPanel {
     private final int preferredWidth = 856;
     private final int preferredHeight = 652;
 
+    /**
+     * Specifies the width of the column with labels of rows
+     */
     private final int rowLabelWidth = 20;
+    /**
+     * Specifies the height of the row with labels of columns
+     */
     private final int colLabelHeight = 20;
 
     private int tileWidth;
@@ -42,8 +48,16 @@ public class MapPanel extends JPanel {
      */
     private final int spacing = 5;
 
+    /**
+     * Reference to the tunnel's map monitor the mapPanel will draw
+     *
+     * @see TunnelsMapMonitor
+     */
     TunnelsMapMonitor tunnelsMapMonitor;
 
+    /**
+     * @param monitor Reference to the tunnel's map monitor the mapPanel will draw
+     */
     public MapPanel(TunnelsMapMonitor monitor) {
         super();
         tunnelsMapMonitor = monitor;
@@ -51,6 +65,8 @@ public class MapPanel extends JPanel {
 
     /**
      * Sets the monitor and repaints the JPanel
+     *
+     * @param monitor Reference to the tunnel's map monitor the mapPanel will draw
      */
     public void setTunnelsMapMonitor(TunnelsMapMonitor monitor) {
         this.tunnelsMapMonitor = monitor;
@@ -89,6 +105,9 @@ public class MapPanel extends JPanel {
         }
     }
 
+    /**
+     * Draws the row and column indexes
+     */
     private void drawLabels(Graphics g) {
         g.setColor(Color.WHITE);
         // drawing row labels

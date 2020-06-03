@@ -109,6 +109,8 @@ public class SimulationModel {
 
     /**
      * Returns number of trains in the simulation.
+     *
+     * @return constant value specifying the number of trains in the simulation
      */
     public int getNumberOfTrains() {
         return ModelParameters.NUMBER_OF_TRAINS;

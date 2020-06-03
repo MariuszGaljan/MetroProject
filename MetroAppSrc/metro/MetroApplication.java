@@ -12,6 +12,8 @@ import metro.gui.MetroGUI;
  * The gui also visualizes the algorithm.
  * <p>
  * Invoke its static start() method to initialize
+ *
+ * @author Mariusz Galjan
  */
 public class MetroApplication {
     public static void start() {

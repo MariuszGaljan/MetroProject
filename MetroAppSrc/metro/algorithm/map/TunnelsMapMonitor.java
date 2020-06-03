@@ -59,9 +59,10 @@ public class TunnelsMapMonitor {
     /**
      * Constructor of TunnelsMapMonitor class.
      *
-     * @param trains   an array of trains.
-     *                 Each train is defined by an array of Coordinates values of its wagons.
-     * @param stations an array of stations' coordinates
+     * @param trains     an array of trains.
+     *                   Each train is defined by an array of Coordinates values of its wagons.
+     * @param stations   an array of stations' coordinates
+     * @param trainOrder queue of initial order of trains
      */
     public TunnelsMapMonitor(Coordinates[][] trains, Coordinates[] stations, Queue<FieldTypes> trainOrder) {
         // adding trains to the map
@@ -81,28 +82,6 @@ public class TunnelsMapMonitor {
         stationsLock = new StationsLock(mapWrapper, lock);
     }
 
-    /**
-     * Procedure used to move the train of trainType via given route.
-     *
-     * @param route       array of Coordinates defining the route the train is supposed to take
-     * @param wagons      array of Coordinates defining the individual wagons of the train.
-     * @param trainType   one of the T1, T2, T3 values of enum FieldTypes
-     * @param moveForward boolean value defining whether the train starts from route[0] or the last elem of route
-     * @throws InterruptedException may throw during the travel
-     */
-    public void travel(Coordinates[] route, Coordinates[] wagons, FieldTypes trainType, boolean moveForward)
-            throws InterruptedException {
-        // first we set start and end point accordingly to the direction
-        Coordinates start = moveForward ? route[0] : route[route.length - 1];
-        Coordinates end = moveForward ? route[route.length - 1] : route[0];
-
-        try {
-            beginCourse(end, trainType);
-            moveToNextStation(route, wagons, trainType, moveForward);
-        } finally {
-            endCourse(start, trainType);
-        }
-    }
 
     /**
      * Procedure used to acquire the locks needed to achieve thread safety.
@@ -140,6 +119,7 @@ public class TunnelsMapMonitor {
      * @param wagons      array of Coordinates defining the individual wagons of the train.
      * @param trainType   one of the T1, T2, T3 values of enum FieldTypes
      * @param moveForward boolean value defining whether the train starts from route[0] or the last elem of route
+     * @throws InterruptedException this method uses sleep to visualize the transition in GUI
      */
     public void moveToNextStation(Coordinates[] route, Coordinates[] wagons, FieldTypes trainType, boolean moveForward)
             throws InterruptedException {
@@ -280,6 +260,8 @@ public class TunnelsMapMonitor {
 
     /**
      * Returns list of coordinates of entrances to all stations
+     *
+     * @return list of coordinates defining the entrances to the stations
      */
     public List<Coordinates> getStationsEntrances() {
         return mapWrapper.getStationsEntrances();
