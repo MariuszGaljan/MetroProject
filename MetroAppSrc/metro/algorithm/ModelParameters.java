@@ -4,10 +4,7 @@ import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -63,6 +60,8 @@ ModelParameters {
      */
     public Queue<FieldTypes> trainOrder;
 
+    public Coordinates[] t1Crossings, t2Crossings, t3Crossings;
+
     /**
      * Initializes routes to the default values.
      *
@@ -108,6 +107,59 @@ ModelParameters {
         trains[2] = t3Wagons;
 
         this.trainOrder = setTrainOrder(trainOrder);
+
+        t1Crossings = generateCrossings(routes[0][0], routes[0][1]);
+        t2Crossings = generateCrossings(routes[1][0], routes[1][1]);
+        t3Crossings = generateCrossings(routes[2][0], routes[2][1]);
+    }
+
+
+    private Coordinates[] generateCrossings(Coordinates start, Coordinates end) {
+        List<Coordinates> route = new LinkedList<>();
+
+        // first, we have to check if start and end are station entrances opposite to each other in the same line
+        // because then we don't have to go into the passage
+        if (start.getRow() == end.getRow() && Math.abs(end.getCol() - start.getCol()) == TunnelsMapMonitor.getWidth() - 3) {
+            route.add(start);
+            route.add(new Coordinates(start.getRow(), TunnelsMapMonitor.getWidth() / 2));
+            route.add(end);
+            return route.toArray(new Coordinates[0]);
+        }
+        if (start.getCol() == end.getCol() && Math.abs(end.getRow() - start.getRow()) == TunnelsMapMonitor.getHeight() - 3) {
+            route.add(start);
+            route.add(new Coordinates(TunnelsMapMonitor.getHeight() / 2, start.getCol()));
+            route.add(end);
+            return route.toArray(new Coordinates[0]);
+        }
+
+        // if not, we create a route through the passage by connecting two routes:
+        //  - from start the middle
+        //  - a reversed route from end to the middle
+        route = getCrossingsToMiddle(start);
+        route.add(middle);
+
+        List<Coordinates> routeToMiddleFromEnd = getCrossingsToMiddle(end);
+        Collections.reverse(routeToMiddleFromEnd);
+        route.addAll(routeToMiddleFromEnd);
+
+        return route.toArray(new Coordinates[0]);
+    }
+
+
+    private List<Coordinates> getCrossingsToMiddle(Coordinates start) {
+        List<Coordinates> route = new LinkedList<>();
+        Coordinates actEnd;
+
+        // first we add a line to the crossing
+        if (start.getCol() == 1 || start.getCol() == TunnelsMapMonitor.getWidth() - 2) {
+            actEnd = new Coordinates(start.getRow(), TunnelsMapMonitor.getWidth() / 2);
+        } else {
+            actEnd = new Coordinates(TunnelsMapMonitor.getHeight() / 2, start.getCol());
+        }
+        route.add(start);
+        route.add(actEnd);
+
+        return route;
     }
 
 
