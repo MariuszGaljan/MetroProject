@@ -36,9 +36,9 @@ public class SimulationModel {
         modelParams = new ModelParameters(trainOrder);
         monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.trainOrder);
 
-        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Route);
-        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Route);
-        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.t3Wagons, modelParams.t3Route);
+        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Route, modelParams.t1Crossings);
+        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Route, modelParams.t2Crossings);
+        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.t3Wagons, modelParams.t3Route, modelParams.t3Crossings);
 
         for (Thread t : trains)
             t.start();
@@ -61,9 +61,9 @@ public class SimulationModel {
         modelParams = new ModelParameters(trainOrder, routes);
         monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.trainOrder);
 
-        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Route);
-        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Route);
-        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.t3Wagons, modelParams.t3Route);
+        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Route, modelParams.t1Crossings);
+        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Route, modelParams.t2Crossings);
+        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.t3Wagons, modelParams.t3Route, modelParams.t3Crossings);
 
         for (Thread t : trains)
             t.start();

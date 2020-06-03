@@ -5,6 +5,8 @@ import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
+import java.util.Arrays;
+
 /**
  * Class representing a concurrent train in the metro
  */
@@ -31,6 +33,8 @@ public class Train extends Thread {
      * The train moves forward and backward along this road.
      */
     private final Coordinates[] route;
+
+    private final Coordinates[] crossings;
     /**
      * A variable defining current direction the train is headed to.
      */
@@ -47,12 +51,13 @@ public class Train extends Thread {
      * @param wagons    array of Coordinates defining the individual wagons of the train.
      * @param route     array of Coordinates defining the route the train is supposed to take
      */
-    public Train(TunnelsMapMonitor monitor, FieldTypes trainType, Coordinates[] wagons, Coordinates[] route) {
+    public Train(TunnelsMapMonitor monitor, FieldTypes trainType, Coordinates[] wagons, Coordinates[] route, Coordinates[] crossings) {
         super(trainType.toString());
         this.wagons = wagons;
         this.tunnelsMap = monitor;
         this.trainType = trainType;
         this.route = route;
+        this.crossings = crossings;
     }
 
     @Override

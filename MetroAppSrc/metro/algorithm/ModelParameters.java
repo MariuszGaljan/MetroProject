@@ -83,6 +83,10 @@ ModelParameters {
         trains[2] = t3Wagons;
 
         this.trainOrder = setTrainOrder(trainOrder);
+
+        t1Crossings = generateCrossings(new Coordinates(0, 1), new Coordinates(16, 9));
+        t2Crossings = generateCrossings(new Coordinates(16, 1), new Coordinates(1, 0));
+        t3Crossings = generateCrossings(new Coordinates(15, 10), new Coordinates(0, 1));
     }
 
     /**
