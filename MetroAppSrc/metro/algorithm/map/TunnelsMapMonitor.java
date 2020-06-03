@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Class used to access the map of the tunnels.
@@ -23,13 +25,9 @@ public class TunnelsMapMonitor {
     FieldTypes[][] tunnelsMap = mapWrapper.map;
 
     /**
-     * Semaphore used to synchronize travelling trains with the GUI map representation
+     * Lock used to synchronize travelling trains with the GUI map representation
      */
-    Semaphore readSem = new Semaphore(1);
-    /**
-     * Semaphore used to synchronize travelling trains with the GUI map representation
-     */
-    Semaphore writeSem = new Semaphore(0);
+    ReadWriteLock ioLock = new ReentrantReadWriteLock();
 
     /**
      * The lock used for synchronization of the trains
@@ -163,26 +161,25 @@ public class TunnelsMapMonitor {
      * @param wagons           array of Coordinates defining the individual wagons of the train.
      * @param nextHeadPosition coordinates the 0th elem of wagons array will move to
      * @param trainType        one of the T1, T2, T3 values of enum FieldTypes
-     * @throws InterruptedException the function is synchronized with a reading mechanism, so it may wait
-     *                              to acquire the writer synchronization tool
      */
-    private void moveTrain(Coordinates[] wagons, Coordinates nextHeadPosition, FieldTypes trainType)
-            throws InterruptedException {
-        writeSem.acquire();
+    private void moveTrain(Coordinates[] wagons, Coordinates nextHeadPosition, FieldTypes trainType) {
+        ioLock.writeLock().lock();
 
-        Coordinates nextPosition = nextHeadPosition;
-        Coordinates oldPosition;
+        try {
+            Coordinates nextPosition = nextHeadPosition;
+            Coordinates oldPosition;
 
-        eraseTrain(wagons);
-        // we shift every wagons position by one
-        for (Coordinates wagon : wagons) {
-            oldPosition = new Coordinates(wagon);
-            wagon.moveTo(nextPosition);
-            nextPosition = oldPosition;
+            eraseTrain(wagons);
+            // we shift every wagons position by one
+            for (Coordinates wagon : wagons) {
+                oldPosition = new Coordinates(wagon);
+                wagon.moveTo(nextPosition);
+                nextPosition = oldPosition;
+            }
+            markTrain(wagons, trainType);
+        } finally {
+            ioLock.writeLock().unlock();
         }
-        markTrain(wagons, trainType);
-
-        readSem.release();
     }
 
     /**
@@ -225,11 +222,7 @@ public class TunnelsMapMonitor {
      * After reading you should invoke endPainting().
      */
     public void beginPainting() {
-        try {
-            readSem.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        ioLock.readLock().lock();
     }
 
     /**
@@ -237,7 +230,7 @@ public class TunnelsMapMonitor {
      * Should be invoked after beginPainting(), once the reading is done.
      */
     public void endPainting() {
-        writeSem.release();
+        ioLock.readLock().unlock();
     }
 
     /**
