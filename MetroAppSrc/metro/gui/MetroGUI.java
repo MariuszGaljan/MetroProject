@@ -246,6 +246,12 @@ public class MetroGUI extends JFrame {
         for (int i = 0; i < trainStarts.length; i++) {
             Coordinates start = trainStarts[i];
             Coordinates end = trainEnds[i];
+
+            if (start == end) {
+                JOptionPane.showMessageDialog(this, "Start and end have to be different");
+                return false;
+            }
+
             for (int j = i + 1; j < trainStarts.length; j++) {
                 if (start == trainEnds[j] && trainStarts[j] == end) {
                     JOptionPane.showMessageDialog(this, "Trains can't block each other");

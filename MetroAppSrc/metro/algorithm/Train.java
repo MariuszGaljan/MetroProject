@@ -59,29 +59,42 @@ public class Train extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                // if the program is paused, the train has to wait
-                synchronized (startPauseMonitor) {
-                    if (isPaused) {
-                        System.out.println(Thread.currentThread().getName() + ": Thread paused");
-                        startPauseMonitor.wait();
+        try {
+            while (true) {
+                if (moveForward) {
+                    for (int i = 0; i < route.length - 1; i++) {
+                        checkPause();
+                        tunnelsMap.beginCourse(route[i]);
+                        tunnelsMap.moveToNextCrossing(route[i], route[i + 1], wagons, trainType);
+                        tunnelsMap.endCourse(route[i]);
+                    }
+                } else {
+                    for (int i = route.length - 1; i > 0; i--) {
+                        checkPause();
+                        tunnelsMap.beginCourse(route[i]);
+                        tunnelsMap.moveToNextCrossing(route[i], route[i - 1], wagons, trainType);
+                        tunnelsMap.endCourse(route[i]);
                     }
                 }
-
-                if (moveForward) {
-                    for (int i = 0; i < route.length - 1; i++)
-                        tunnelsMap.moveToNextCrossing(route[i], route[i + 1], wagons, trainType);
-                } else {
-                    for (int i = route.length - 1; i > 0; i--)
-                        tunnelsMap.moveToNextCrossing(route[i], route[i - 1], wagons, trainType);
-                }
-
                 // after getting to the destination, the train turns around and goes back
                 moveForward = !moveForward;
-            } catch (InterruptedException e) {
-                System.out.println(getName() + ": Interrupted");
-                return;
+            }
+        } catch (InterruptedException e) {
+            System.out.println(getName() + ": Interrupted");
+        }
+    }
+
+    /**
+     * Starts waiting if isPaused is set.
+     *
+     * @throws InterruptedException may throw exception while waiting
+     */
+    private void checkPause() throws InterruptedException {
+        // if the program is paused, the train has to wait
+        synchronized (startPauseMonitor) {
+            if (isPaused) {
+                System.out.println(Thread.currentThread().getName() + ": Thread paused");
+                startPauseMonitor.wait();
             }
         }
     }

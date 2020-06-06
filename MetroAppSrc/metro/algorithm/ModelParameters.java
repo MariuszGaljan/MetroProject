@@ -48,7 +48,7 @@ ModelParameters {
      * Array of trains.
      * Each train is an array of coordinates of its wagons.
      */
-    public Coordinates[][] trains;
+    public Coordinates[][] trains = new Coordinates[NUMBER_OF_TRAINS][];
 
     /**
      * An array of coordinates specifying the route of the train.
@@ -61,6 +61,7 @@ ModelParameters {
     public Queue<FieldTypes> trainOrder;
 
     public Coordinates[] t1Crossings, t2Crossings, t3Crossings;
+    public Coordinates[][] crossings = new Coordinates[NUMBER_OF_TRAINS][];
 
     /**
      * Initializes routes to the default values.
@@ -77,7 +78,6 @@ ModelParameters {
         t2Wagons = generateTrainFromRoute(t2Route);
         t3Wagons = generateTrainFromRoute(t3Route);
 
-        trains = new Coordinates[NUMBER_OF_TRAINS][];
         trains[0] = t1Wagons;
         trains[1] = t2Wagons;
         trains[2] = t3Wagons;
@@ -87,6 +87,9 @@ ModelParameters {
         t1Crossings = generateCrossings(new Coordinates(0, 1), new Coordinates(16, 9));
         t2Crossings = generateCrossings(new Coordinates(16, 1), new Coordinates(1, 0));
         t3Crossings = generateCrossings(new Coordinates(15, 10), new Coordinates(0, 1));
+        crossings[0] = t1Crossings;
+        crossings[1] = t2Crossings;
+        crossings[2] = t3Crossings;
     }
 
     /**
@@ -105,7 +108,6 @@ ModelParameters {
         t2Wagons = generateTrainFromRoute(t2Route);
         t3Wagons = generateTrainFromRoute(t3Route);
 
-        trains = new Coordinates[NUMBER_OF_TRAINS][];
         trains[0] = t1Wagons;
         trains[1] = t2Wagons;
         trains[2] = t3Wagons;
@@ -115,6 +117,9 @@ ModelParameters {
         t1Crossings = generateCrossings(routes[0][0], routes[0][1]);
         t2Crossings = generateCrossings(routes[1][0], routes[1][1]);
         t3Crossings = generateCrossings(routes[2][0], routes[2][1]);
+        crossings[0] = t1Crossings;
+        crossings[1] = t2Crossings;
+        crossings[2] = t3Crossings;
     }
 
 

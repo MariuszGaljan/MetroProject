@@ -34,7 +34,7 @@ public class SimulationModel {
     public SimulationModel(FieldTypes[] trainOrder) {
         // here we specify the parameters of the simulation
         modelParams = new ModelParameters(trainOrder);
-        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.trainOrder);
+        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.crossings);
 
         trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Crossings);
         trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Crossings);
@@ -59,7 +59,7 @@ public class SimulationModel {
     public SimulationModel(FieldTypes[] trainOrder, Coordinates[][] routes) {
         // here we specify the parameters of the simulation
         modelParams = new ModelParameters(trainOrder, routes);
-        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.trainOrder);
+        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.crossings);
 
         trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Crossings);
         trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Crossings);
