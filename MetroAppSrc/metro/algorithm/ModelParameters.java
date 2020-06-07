@@ -7,8 +7,6 @@ import metro.algorithm.map.TunnelsMapMonitor;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Class used to specify parameters of the metro simulation:
@@ -44,21 +42,13 @@ public class ModelParameters {
      */
     public Coordinates[] t1Route, t2Route, t3Route;
 
-    /**
-     * Specifying the initial order of the trains
-     */
-    public Queue<FieldTypes> trainOrder;
-
     public Coordinates[] t1Crossings, t2Crossings, t3Crossings;
     public Coordinates[][] crossings = new Coordinates[NUMBER_OF_TRAINS][];
 
     /**
      * Initializes routes to the default values.
-     *
-     * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
-     *                   specifying the initial order of the trains
      */
-    public ModelParameters(FieldTypes[] trainOrder) {
+    public ModelParameters() {
         t1Route = generateRoute(new Coordinates(0, 1), new Coordinates(16, 9));
         t2Route = generateRoute(new Coordinates(16, 1), new Coordinates(1, 0));
         t3Route = generateRoute(new Coordinates(15, 10), new Coordinates(0, 1));
@@ -66,8 +56,6 @@ public class ModelParameters {
         trains[0] = generateTrainFromRoute(t1Route);
         trains[1] = generateTrainFromRoute(t2Route);
         trains[2] = generateTrainFromRoute(t3Route);
-
-        this.trainOrder = setTrainOrder(trainOrder);
 
         t1Crossings = generateCrossings(new Coordinates(0, 1), new Coordinates(16, 9));
         t2Crossings = generateCrossings(new Coordinates(16, 1), new Coordinates(1, 0));
@@ -78,13 +66,11 @@ public class ModelParameters {
     }
 
     /**
-     * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
-     *                   specifying the initial order of the trains
-     * @param routes     an array of Coordinates pairs, specifying each route's start and end
-     *                   e.g. For train 1 route routes[0][0] = start, route[0][1] = end
-     *                   For train 2 route routes[1][0] = start, route[1][1] = end
+     * @param routes an array of Coordinates pairs, specifying each route's start and end
+     *               e.g. For train 1 route routes[0][0] = start, route[0][1] = end
+     *               For train 2 route routes[1][0] = start, route[1][1] = end
      */
-    public ModelParameters(FieldTypes[] trainOrder, Coordinates[][] routes) {
+    public ModelParameters(Coordinates[][] routes) {
         t1Route = generateRoute(routes[0][0], routes[0][1]);
         t2Route = generateRoute(routes[1][0], routes[1][1]);
         t3Route = generateRoute(routes[2][0], routes[2][1]);
@@ -92,8 +78,6 @@ public class ModelParameters {
         trains[0] = generateTrainFromRoute(t1Route);
         trains[1] = generateTrainFromRoute(t2Route);
         trains[2] = generateTrainFromRoute(t3Route);
-
-        this.trainOrder = setTrainOrder(trainOrder);
 
         t1Crossings = generateCrossings(routes[0][0], routes[0][1]);
         t2Crossings = generateCrossings(routes[1][0], routes[1][1]);
@@ -265,19 +249,6 @@ public class ModelParameters {
                     route.add(new Coordinates(i, start.getCol()));
             }
         }
-    }
-
-
-    /**
-     * Generates a queue from a given array, specifying the initial order of the trains
-     *
-     * @param trains array of FieldTypes' T1, T2, T3 values
-     * @return queue specifying the initial order of trains
-     */
-    public Queue<FieldTypes> setTrainOrder(FieldTypes[] trains) {
-        Queue<FieldTypes> queue = new ConcurrentLinkedQueue<>();
-        Collections.addAll(queue, trains);
-        return queue;
     }
 
 

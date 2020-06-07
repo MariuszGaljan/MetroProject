@@ -70,11 +70,13 @@ public class SegmentLock {
         for (Segment s : segments) {
             if (moveForward) {
                 if (s.isTrainCrossing(train) && s.getEnd().equals(end)) {
-                    s.unlockSegment();
+                    if (s.getLock().isHeldByCurrentThread())
+                        s.unlockSegment();
                 }
             } else {
                 if (s.isTrainCrossing(train) && s.getStart().equals(end)) {
-                    s.unlockSegment();
+                    if (s.getLock().isHeldByCurrentThread())
+                        s.unlockSegment();
                 }
             }
         }

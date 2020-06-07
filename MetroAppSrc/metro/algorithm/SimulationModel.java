@@ -27,13 +27,10 @@ public class SimulationModel {
 
     /**
      * Initializes routes to the default values.
-     *
-     * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
-     *                   specifying the initial order of the trains
      */
-    public SimulationModel(FieldTypes[] trainOrder) {
+    public SimulationModel() {
         // here we specify the parameters of the simulation
-        modelParams = new ModelParameters(trainOrder);
+        modelParams = new ModelParameters();
         monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.crossings);
 
         trains[0] = new Train(monitor, FieldTypes.T1, modelParams.trains[0], modelParams.t1Crossings);
@@ -50,15 +47,13 @@ public class SimulationModel {
     /**
      * Initializes routes to the default values.
      *
-     * @param trainOrder an array of FieldTypes enum values T1, T2, T3,
-     *                   specifying the initial order of the trains
      * @param routes     an array of Coordinates pairs, specifying each route's start and end
      *                   e.g. For train 1 route routes[0][0] = start, route[0][1] = end
      *                   For train 2 route routes[1][0] = start, route[1][1] = end
      */
-    public SimulationModel(FieldTypes[] trainOrder, Coordinates[][] routes) {
+    public SimulationModel(Coordinates[][] routes) {
         // here we specify the parameters of the simulation
-        modelParams = new ModelParameters(trainOrder, routes);
+        modelParams = new ModelParameters(routes);
         monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.crossings);
 
         trains[0] = new Train(monitor, FieldTypes.T1, modelParams.trains[0], modelParams.t1Crossings);

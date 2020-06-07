@@ -22,127 +22,6 @@
         </properties>
         <border type="none"/>
         <children>
-          <grid id="79bba" binding="trainOrderSelection" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="5" left="10" bottom="10" right="10"/>
-            <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <background color="-10855073"/>
-            </properties>
-            <border type="none"/>
-            <children>
-              <component id="b745e" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                    <preferred-size width="-1" height="30"/>
-                  </grid>
-                </constraints>
-                <properties>
-                  <foreground color="-1775639"/>
-                  <text value="The initial order of trains:&#10;"/>
-                </properties>
-              </component>
-              <grid id="9c3e6" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                <margin top="0" left="0" bottom="0" right="0"/>
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <background color="-10855073"/>
-                </properties>
-                <border type="none"/>
-                <children>
-                  <component id="2f92f" class="javax.swing.JLabel">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <foreground color="-1775639"/>
-                      <text value="Train 1"/>
-                    </properties>
-                  </component>
-                  <component id="ae1a3" class="javax.swing.JComboBox" binding="train1Select" custom-create="true">
-                    <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                        <preferred-size width="100" height="-1"/>
-                      </grid>
-                    </constraints>
-                    <properties>
-                      <background color="-12763583"/>
-                      <foreground color="-1775639"/>
-                      <maximumRowCount value="3"/>
-                      <name value=""/>
-                      <toolTipText value="Select the first train in order"/>
-                    </properties>
-                  </component>
-                </children>
-              </grid>
-              <grid id="fd1b5" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                <margin top="0" left="0" bottom="0" right="0"/>
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <background color="-10855073"/>
-                </properties>
-                <border type="none"/>
-                <children>
-                  <component id="39c9d" class="javax.swing.JLabel">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <foreground color="-1775639"/>
-                      <text value="Train 2"/>
-                    </properties>
-                  </component>
-                  <component id="d7ea8" class="javax.swing.JComboBox" binding="train2Select" custom-create="true">
-                    <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <background color="-12763583"/>
-                      <foreground color="-1775639"/>
-                      <toolTipText value="Select the second train in order"/>
-                    </properties>
-                  </component>
-                </children>
-              </grid>
-              <grid id="3c351" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-                <margin top="0" left="0" bottom="0" right="0"/>
-                <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <background color="-10855073"/>
-                </properties>
-                <border type="none"/>
-                <children>
-                  <component id="227e7" class="javax.swing.JLabel">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <foreground color="-1775639"/>
-                      <text value="Train 3"/>
-                    </properties>
-                  </component>
-                  <component id="c97c" class="javax.swing.JComboBox" binding="train3Select" custom-create="true">
-                    <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <background color="-12763583"/>
-                      <editable value="false"/>
-                      <foreground color="-1775639"/>
-                      <toolTipText value="Select the third train in order"/>
-                    </properties>
-                  </component>
-                </children>
-              </grid>
-            </children>
-          </grid>
           <grid id="fff77" binding="trainRouteSelection" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
@@ -424,10 +303,143 @@
             </constraints>
             <properties>
               <background color="-10855073"/>
+              <font size="18"/>
               <foreground color="-1775639"/>
               <text value="New simulation parameters"/>
             </properties>
           </component>
+          <grid id="86351" binding="trainSpeedSelection" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <background color="-10855073"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="a65ff" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-10855073"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <component id="f7a2e" class="javax.swing.JSlider" binding="t1Slider" custom-create="true">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <background color="-10855073"/>
+                      <inverted value="true"/>
+                      <majorTickSpacing value="200"/>
+                      <maximum value="1000"/>
+                      <minimum value="100"/>
+                      <minorTickSpacing value="100"/>
+                      <paintLabels value="false"/>
+                      <paintTicks value="true"/>
+                      <value value="100"/>
+                    </properties>
+                  </component>
+                  <component id="42b8e" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <foreground color="-1775639"/>
+                      <text value="Train 1"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="74359" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-10855073"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <component id="48579" class="javax.swing.JSlider" binding="t2Slider" custom-create="true">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <background color="-10855073"/>
+                      <inverted value="true"/>
+                      <majorTickSpacing value="200"/>
+                      <maximum value="1000"/>
+                      <minimum value="100"/>
+                      <minorTickSpacing value="100"/>
+                      <paintLabels value="false"/>
+                      <paintTicks value="true"/>
+                      <value value="200"/>
+                    </properties>
+                  </component>
+                  <component id="6a322" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <foreground color="-1775639"/>
+                      <text value="Train 2"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="cc755" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-10855073"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <component id="ad2ff" class="javax.swing.JSlider" binding="t3Slider">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <background color="-10855073"/>
+                      <inverted value="true"/>
+                      <majorTickSpacing value="200"/>
+                      <maximum value="1000"/>
+                      <minimum value="100"/>
+                      <minorTickSpacing value="100"/>
+                      <paintLabels value="false"/>
+                      <paintTicks value="true"/>
+                      <value value="300"/>
+                    </properties>
+                  </component>
+                  <component id="5da23" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <foreground color="-1775639"/>
+                      <text value="Train 3"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <component id="9e99" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <foreground color="-1775639"/>
+                  <text value="Train speed:"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
         </children>
       </grid>
       <grid id="b0be2" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

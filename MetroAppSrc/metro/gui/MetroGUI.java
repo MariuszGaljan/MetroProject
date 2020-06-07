@@ -6,6 +6,8 @@ import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,11 +30,8 @@ public class MetroGUI extends JFrame {
 
     private JPanel newSimulationParameters;
     private JButton newSimButton;
-    /**
-     * combo box used for the initial train order selection
-     */
-    private JComboBox<FieldTypes> train1Select, train2Select, train3Select;
-    private JPanel trainOrderSelection, trainRouteSelection;
+
+    private JPanel trainRouteSelection;
     private JPanel train1Route;
     /**
      * Box used to specify one of the ends of the route of train T1
@@ -52,6 +51,20 @@ public class MetroGUI extends JFrame {
      * Button used to reset the simulation
      */
     private JButton resetButton;
+    private JPanel trainSpeedSelection;
+    private JSlider t1Slider;
+    private JSlider t2Slider;
+    private JSlider t3Slider;
+
+    /**
+     * Speed of the trains defined in sleep time per tile in seconds
+     */
+    private static final int SLEEP_MAX = 1000;
+    private static final int SLEEP_MIN = 100;
+
+    private int actT1Speed = 100;
+    private int actT2Speed = 200;
+    private int actT3Speed = 300;
 
     /**
      * The simulation model of the metro
@@ -68,7 +81,6 @@ public class MetroGUI extends JFrame {
      */
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    private FieldTypes[] trainOrder;
     private Coordinates[][] routes;
 
     /**
@@ -82,16 +94,15 @@ public class MetroGUI extends JFrame {
         addListeners();
         pack();
         setVisible(true);
+
     }
 
     /**
      * Custom creation of chosen elements.
      */
     private void createUIComponents() {
-        FieldTypes[] initialTrainOrder = {FieldTypes.T1, FieldTypes.T2, FieldTypes.T3};
-
         if (metro == null) {
-            metro = new SimulationModel(initialTrainOrder);
+            metro = new SimulationModel();
         }
         if (tunnelsMapMonitor == null) {
             tunnelsMapMonitor = metro.getMonitor();
@@ -100,12 +111,9 @@ public class MetroGUI extends JFrame {
         mapPanelType = new MapPanel(tunnelsMapMonitor);
         mapPanel = mapPanelType;
 
-        train1Select = new JComboBox<>(initialTrainOrder);
-        train1Select.setSelectedIndex(0);
-        train2Select = new JComboBox<>(initialTrainOrder);
-        train2Select.setSelectedIndex(1);
-        train3Select = new JComboBox<>(initialTrainOrder);
-        train3Select.setSelectedIndex(2);
+        t1Slider = new JSlider(SLEEP_MIN, SLEEP_MAX, actT1Speed);
+        t2Slider = new JSlider(SLEEP_MIN, SLEEP_MAX, actT2Speed);
+        t3Slider = new JSlider(SLEEP_MIN, SLEEP_MAX, actT3Speed);
 
         Coordinates[] stationsEntrances = tunnelsMapMonitor.getStationsEntrances().toArray(new Coordinates[0]);
         Coordinates[] starts = metro.getRouteStarts();
@@ -126,7 +134,6 @@ public class MetroGUI extends JFrame {
         train3End = new JComboBox<>(stationsEntrances);
         train3End.setSelectedItem(ends[2]);
 
-        trainOrder = initialTrainOrder;
         routes = getRoutes();
     }
 
@@ -135,7 +142,6 @@ public class MetroGUI extends JFrame {
         startPauseButton.addActionListener(e -> {
             if (startPauseButton.getText().equals("Launch simulation")) {
 //                createNewSimulation();
-                System.out.println("Train order: " + Arrays.toString(getTrainOrder()));
                 metro.restart();
                 isRunning.set(true);
                 new SwingWorker<Void, Void>() {
@@ -198,6 +204,33 @@ public class MetroGUI extends JFrame {
             revalidate();
             repaint();
         });
+
+        t1Slider.addChangeListener(e -> {
+            JSlider source = (JSlider) e.getSource();
+            if (!source.getValueIsAdjusting()) {
+                int speed = source.getValue();
+                metro.setSleepTime(FieldTypes.T1, speed);
+                actT1Speed = speed;
+            }
+        });
+
+        t2Slider.addChangeListener(e -> {
+            JSlider source = (JSlider) e.getSource();
+            if (!source.getValueIsAdjusting()) {
+                int speed = source.getValue();
+                metro.setSleepTime(FieldTypes.T2, speed);
+                actT2Speed = speed;
+            }
+        });
+
+        t3Slider.addChangeListener(e -> {
+            JSlider source = (JSlider) e.getSource();
+            if (!source.getValueIsAdjusting()) {
+                int speed = source.getValue();
+                metro.setSleepTime(FieldTypes.T3, speed);
+                actT3Speed = speed;
+            }
+        });
     }
 
     /**
@@ -205,9 +238,8 @@ public class MetroGUI extends JFrame {
      * Updates attributes of the gui.
      */
     private void createNewSimulation() {
-        trainOrder = getTrainOrder();
         routes = getRoutes();
-        metro = new SimulationModel(trainOrder, routes);
+        metro = new SimulationModel(routes);
         tunnelsMapMonitor = metro.getMonitor();
         mapPanelType.setTunnelsMapMonitor(tunnelsMapMonitor);
     }
@@ -216,7 +248,7 @@ public class MetroGUI extends JFrame {
      * Resets current simulation to its initial state.
      */
     private void resetSimulation() {
-        metro = new SimulationModel(trainOrder, routes);
+        metro = new SimulationModel(routes);
         tunnelsMapMonitor = metro.getMonitor();
         mapPanelType.setTunnelsMapMonitor(tunnelsMapMonitor);
     }
@@ -279,19 +311,6 @@ public class MetroGUI extends JFrame {
         return routes;
     }
 
-
-    /**
-     * Reads the initial order of the trains and returns it as an array
-     *
-     * @return array of FieldTypes specifying order of the trains
-     */
-    private FieldTypes[] getTrainOrder() {
-        FieldTypes[] trainOrder = new FieldTypes[metro.getNumberOfTrains()];
-        trainOrder[0] = (FieldTypes) train1Select.getSelectedItem();
-        trainOrder[1] = (FieldTypes) train2Select.getSelectedItem();
-        trainOrder[2] = (FieldTypes) train3Select.getSelectedItem();
-        return trainOrder;
-    }
 
     /**
      * Thread-safely reads the map from the monitor and paints it in the GUI
