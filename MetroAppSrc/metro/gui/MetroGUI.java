@@ -6,9 +6,10 @@ import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
