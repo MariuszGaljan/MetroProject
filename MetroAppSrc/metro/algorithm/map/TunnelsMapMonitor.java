@@ -1,12 +1,7 @@
 package metro.algorithm.map;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Condition;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -30,127 +25,158 @@ public class TunnelsMapMonitor {
     ReadWriteLock ioLock = new ReentrantReadWriteLock();
 
     /**
-     * The lock used for synchronization of the trains
+     * Used for storing and synchronization of shared route segments
      */
-    ReentrantLock lock = new ReentrantLock();
-
-    /**
-     * Used to distinguish occupied station sides from the free ones.
-     * tactically, these are conditions, but I thought lock is a more appropriate name for its use
-     * <p>
-     * Uses the same lock as the monitor
-     * <p>
-     * Necessary for the trains' synchronization *
-     */
-    StationsLock stationsLock;
-
-    /**
-     * A condition used to ensure that only one train is moving at any time
-     */
-    Condition supervisor = lock.newCondition();
-    /**
-     * Queue specifying the initial order of the trains.
-     */
-    Queue<FieldTypes> trainQueue;
-
+    SegmentLock segmentLock;
 
     /**
      * Constructor of TunnelsMapMonitor class.
      *
-     * @param trains     an array of trains.
-     *                   Each train is defined by an array of Coordinates values of its wagons.
-     * @param stations   an array of stations' coordinates
-     * @param trainOrder queue of initial order of trains
+     * @param trains an array of trains.
+     *               Each train is defined by an array of Coordinates values of its wagons.
      */
-    public TunnelsMapMonitor(Coordinates[][] trains, Coordinates[] stations, Queue<FieldTypes> trainOrder) {
+    public TunnelsMapMonitor(Coordinates[][] trains, Coordinates[][] trainRoutes) {
         // adding trains to the map
         markTrain(trains[0], FieldTypes.T1);
         markTrain(trains[1], FieldTypes.T2);
         markTrain(trains[2], FieldTypes.T3);
 
-        // initial order of the trains
-        trainQueue = trainOrder;
-
-        // adding station to the map
-        TunnelsMap.stations = stations;
-        for (Coordinates station : TunnelsMap.stations)
-            tunnelsMap[station.getRow()][station.getCol()] = FieldTypes.STATION;
-
-        // initializing the locks for every station's entrance (side)
-        stationsLock = new StationsLock(mapWrapper, lock);
+        segmentLock = new SegmentLock(createSharedSegments(trainRoutes));
+        System.out.println("Shared segments: " + segmentLock);
+        System.out.println();
     }
 
 
     /**
-     * Procedure used to acquire the locks needed to achieve thread safety.
+     * Procedure moving the train from crossing start to crossing end
      *
-     * @param destination coordinate of the route's end point. It's used to lock the station lock of a given coordinate
-     * @param trainType   enum value defining the current train
-     * @throws InterruptedException the thread can wait on a Condition
-     */
-    public void beginCourse(Coordinates destination, FieldTypes trainType) throws InterruptedException {
-        lock.lock();
-
-        // if the queue is empty, it means all the trains are blocking each other
-        if (trainQueue.isEmpty()) {
-            System.out.println(Thread.currentThread().getName() + ": no possible move");
-            return;
-        }
-
-        while (trainQueue.peek() != trainType || stationsLock.isThreadIsWaiting()) {
-            // if it's not this train's turn, we have to signal the next waiting train
-            // so it checks if it's maybe its turn
-            supervisor.signal();
-            supervisor.await();
-        }
-
-        // once it's this train's turn, we remove it from the queue
-        trainQueue.poll();
-        stationsLock.lockDestination(destination, supervisor);
-    }
-
-
-    /**
-     * Procedure moving the train via the route to its destination
-     *
-     * @param route       array of Coordinates defining the route the train is supposed to take
+     * @param start       coordinates of current crossing
+     * @param end         coordinates of destination crossing
      * @param wagons      array of Coordinates defining the individual wagons of the train.
      * @param trainType   one of the T1, T2, T3 values of enum FieldTypes
-     * @param moveForward boolean value defining whether the train starts from route[0] or the last elem of route
+     * @param moveForward boolean value specifying the direction the train is heading
      * @throws InterruptedException this method uses sleep to visualize the transition in GUI
      */
-    public void moveToNextStation(Coordinates[] route, Coordinates[] wagons, FieldTypes trainType, boolean moveForward)
+    public void moveToNextCrossing(Coordinates start, Coordinates end, Coordinates[] wagons, FieldTypes trainType, boolean moveForward)
             throws InterruptedException {
-        if (moveForward) {
-            for (Coordinates nextStep : route) {
-                moveTrain(wagons, nextStep, trainType);
-                // I used sleep here to make the transition visible in the GUI
-                Thread.sleep(200);
+        boolean horizontal = start.getRow() == end.getRow();
+        boolean previousSegmentReleased = false;
+
+        segmentLock.lockTrainSegments(trainType, start, moveForward);
+
+        if (horizontal) {
+            if (start.getCol() < end.getCol()) {
+                // left to right
+                for (int i = start.getCol(); i < end.getCol(); i++) {
+                    moveTrain(wagons, new Coordinates(start.getRow(), i), trainType);
+                    if (!previousSegmentReleased && !trainIsOnCrossing(start, wagons)) {
+                        segmentLock.unlockTrainSegments(trainType, start, moveForward);
+                        previousSegmentReleased = true;
+                    }
+                    Thread.sleep(200);
+                }
+            } else {
+                // right to left
+                for (int i = start.getCol(); i > end.getCol(); i--) {
+                    moveTrain(wagons, new Coordinates(start.getRow(), i), trainType);
+                    if (!previousSegmentReleased && !trainIsOnCrossing(start, wagons)) {
+                        segmentLock.unlockTrainSegments(trainType, start, moveForward);
+                        previousSegmentReleased = true;
+                    }
+                    Thread.sleep(200);
+                }
             }
         } else {
-            Coordinates nextStep;
-            for (int i = route.length - 1; i >= 0; i--) {
-                nextStep = route[i];
-                moveTrain(wagons, nextStep, trainType);
-                Thread.sleep(200);
+            if (start.getRow() < end.getRow()) {
+                // top to bottom
+                for (int i = start.getRow(); i < end.getRow(); i++) {
+                    moveTrain(wagons, new Coordinates(i, start.getCol()), trainType);
+                    if (!previousSegmentReleased && !trainIsOnCrossing(start, wagons)) {
+                        segmentLock.unlockTrainSegments(trainType, start, moveForward);
+                        previousSegmentReleased = true;
+                    }
+                    Thread.sleep(200);
+                }
+            } else {
+                // bottom to top
+                for (int i = start.getRow(); i > end.getRow(); i--) {
+                    moveTrain(wagons, new Coordinates(i, start.getCol()), trainType);
+                    if (!previousSegmentReleased && !trainIsOnCrossing(start, wagons)) {
+                        segmentLock.unlockTrainSegments(trainType, start, moveForward);
+                        previousSegmentReleased = true;
+                    }
+                    Thread.sleep(200);
+                }
             }
         }
     }
 
 
     /**
-     * Procedure used to release the locks and the starting point of the train.
-     * Should be called after the beginCourse function
-     * Adds the train that reached its destination to the end of the queue.
+     * Checks if the one of the wagons is on the crossing.
      *
-     * @param start     coordinates of the starting point to unlock
-     * @param trainType one of the T1, T2, T3 values of enum FieldTypes
+     * @param crossing coordinates of the crossing
+     * @param wagons   coordinates of the train's wagons
+     * @return true if a wagon's coordinates are equal to crossing's
+     * false otherwise
      */
-    public void endCourse(Coordinates start, FieldTypes trainType) {
-        trainQueue.add(trainType);
-        stationsLock.signalStartingPoint(start);
-        lock.unlock();
-        supervisor.signal();
+    private boolean trainIsOnCrossing(Coordinates crossing, Coordinates[] wagons) {
+        for (Coordinates wagon : wagons) {
+            if (wagon.equals(crossing))
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Analyzes the trains' routes and creates shared segments based on them.
+     * Every train has its own copy of a segment.
+     *
+     * @param trainRoutes array of Coordinates arrays of train routes
+     * @return array of shared segments
+     */
+    private Segment[] createSharedSegments(Coordinates[][] trainRoutes) {
+        List<Segment> segments = new LinkedList<>();
+        FieldTypes[] trains = {FieldTypes.T1, FieldTypes.T2, FieldTypes.T3};
+
+        for (int i = 0; i < trainRoutes.length; i++) {
+            for (int j = 0; j < trainRoutes.length; j++) {
+                if (i == j)
+                    continue;
+                Segment[] sharedSegments = getSharedSegmentsForTwoTrains(trainRoutes[i], trainRoutes[j], trains[i], trains[j]);
+                segments.addAll(Arrays.asList(sharedSegments));
+            }
+        }
+        return segments.toArray(new Segment[0]);
+    }
+
+
+    /**
+     * Analyzes the routes of two trains and creates shared segments based on them.
+     * Every train has its own copy of a segment.
+     *
+     * @param t1Route array of coordinates specifying the route of the first train
+     * @param t2Route array of coordinates specifying the route of the second train
+     * @param t1      enum value used for segment owner identification
+     * @param t2      enum value used for segment owner identification
+     * @return array of shared segments
+     */
+    private Segment[] getSharedSegmentsForTwoTrains(Coordinates[] t1Route, Coordinates[] t2Route, FieldTypes t1, FieldTypes t2) {
+        LinkedList<Segment> segments = new LinkedList<>();
+        Set<Coordinates> otherRoute = new HashSet<>(Arrays.asList(t2Route));
+        Coordinates actStart = t1Route[0];
+        for (int i = 0; i < t1Route.length - 1; i++) {
+            if (otherRoute.contains(t1Route[i]) && !otherRoute.contains(t1Route[i + 1])) {
+                segments.add(new Segment(actStart, t1Route[i], t1));
+                actStart = t1Route[i];
+            }
+            if (!otherRoute.contains(t1Route[i]) && otherRoute.contains(t1Route[i + 1])) {
+                actStart = t1Route[i + 1];
+            }
+        }
+        if (otherRoute.contains(t1Route[t1Route.length - 2]) && otherRoute.contains(t1Route[t1Route.length - 1]))
+            segments.add(new Segment(actStart, t1Route[t1Route.length - 1], t1));
+        return segments.toArray(new Segment[0]);
     }
 
 

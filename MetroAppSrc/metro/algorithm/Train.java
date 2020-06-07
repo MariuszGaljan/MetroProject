@@ -29,8 +29,10 @@ public class Train extends Thread {
     /**
      * The route of this train.
      * The train moves forward and backward along this road.
+     * The road is defined by the crossings the train has to pass through
      */
     private final Coordinates[] route;
+
     /**
      * A variable defining current direction the train is headed to.
      */
@@ -57,32 +59,38 @@ public class Train extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                // if the program is paused, the train has to wait
-                synchronized (startPauseMonitor) {
-                    if (isPaused) {
-                        System.out.println(Thread.currentThread().getName() + ": Thread paused");
-                        startPauseMonitor.wait();
+        try {
+            while (true) {
+                if (moveForward) {
+                    for (int i = 0; i < route.length - 1; i++) {
+                        checkPause();
+                        tunnelsMap.moveToNextCrossing(route[i], route[i + 1], wagons, trainType, moveForward);
+                    }
+                } else {
+                    for (int i = route.length - 1; i > 0; i--) {
+                        checkPause();
+                        tunnelsMap.moveToNextCrossing(route[i], route[i - 1], wagons, trainType, moveForward);
                     }
                 }
-
-                // first we set start and end point accordingly to the direction
-                Coordinates start = moveForward ? route[0] : route[route.length - 1];
-                Coordinates end = moveForward ? route[route.length - 1] : route[0];
-
-                try {
-                    tunnelsMap.beginCourse(end, trainType);
-                    tunnelsMap.moveToNextStation(route, wagons, trainType, moveForward);
-                } finally {
-                    tunnelsMap.endCourse(start, trainType);
-                }
-
                 // after getting to the destination, the train turns around and goes back
                 moveForward = !moveForward;
-            } catch (InterruptedException e) {
-                System.out.println(getName() + ": Interrupted");
-                return;
+            }
+        } catch (InterruptedException e) {
+            System.out.println(getName() + ": Interrupted");
+        }
+    }
+
+    /**
+     * Starts waiting if isPaused is set.
+     *
+     * @throws InterruptedException may throw exception while waiting
+     */
+    private void checkPause() throws InterruptedException {
+        // if the program is paused, the train has to wait
+        synchronized (startPauseMonitor) {
+            if (isPaused) {
+                System.out.println(Thread.currentThread().getName() + ": Thread paused");
+                startPauseMonitor.wait();
             }
         }
     }

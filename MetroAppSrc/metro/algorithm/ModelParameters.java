@@ -20,8 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @see Coordinates
  * @see FieldTypes
  */
-public class
-ModelParameters {
+public class ModelParameters {
     public static final int NUMBER_OF_TRAINS = 3;
     /**
      * Number of wagons in each train
@@ -35,23 +34,10 @@ ModelParameters {
             = new Coordinates(TunnelsMapMonitor.getHeight() / 2, TunnelsMapMonitor.getWidth() / 2);
 
     /**
-     * Array of coordinates of stations on the map
-     */
-    public Coordinates[] stations = {
-            new Coordinates(0, 0),
-            new Coordinates(0, 10),
-            new Coordinates(16, 0),
-            new Coordinates(16, 10)
-    };
-
-
-    public Coordinates[] t1Wagons, t2Wagons, t3Wagons;
-
-    /**
      * Array of trains.
      * Each train is an array of coordinates of its wagons.
      */
-    public Coordinates[][] trains;
+    public Coordinates[][] trains = new Coordinates[NUMBER_OF_TRAINS][];
 
     /**
      * An array of coordinates specifying the route of the train.
@@ -62,6 +48,9 @@ ModelParameters {
      * Specifying the initial order of the trains
      */
     public Queue<FieldTypes> trainOrder;
+
+    public Coordinates[] t1Crossings, t2Crossings, t3Crossings;
+    public Coordinates[][] crossings = new Coordinates[NUMBER_OF_TRAINS][];
 
     /**
      * Initializes routes to the default values.
@@ -74,16 +63,18 @@ ModelParameters {
         t2Route = generateRoute(new Coordinates(16, 1), new Coordinates(1, 0));
         t3Route = generateRoute(new Coordinates(15, 10), new Coordinates(0, 1));
 
-        t1Wagons = generateTrainFromRoute(t1Route);
-        t2Wagons = generateTrainFromRoute(t2Route);
-        t3Wagons = generateTrainFromRoute(t3Route);
-
-        trains = new Coordinates[NUMBER_OF_TRAINS][];
-        trains[0] = t1Wagons;
-        trains[1] = t2Wagons;
-        trains[2] = t3Wagons;
+        trains[0] = generateTrainFromRoute(t1Route);
+        trains[1] = generateTrainFromRoute(t2Route);
+        trains[2] = generateTrainFromRoute(t3Route);
 
         this.trainOrder = setTrainOrder(trainOrder);
+
+        t1Crossings = generateCrossings(new Coordinates(0, 1), new Coordinates(16, 9));
+        t2Crossings = generateCrossings(new Coordinates(16, 1), new Coordinates(1, 0));
+        t3Crossings = generateCrossings(new Coordinates(15, 10), new Coordinates(0, 1));
+        crossings[0] = t1Crossings;
+        crossings[1] = t2Crossings;
+        crossings[2] = t3Crossings;
     }
 
     /**
@@ -98,16 +89,79 @@ ModelParameters {
         t2Route = generateRoute(routes[1][0], routes[1][1]);
         t3Route = generateRoute(routes[2][0], routes[2][1]);
 
-        t1Wagons = generateTrainFromRoute(t1Route);
-        t2Wagons = generateTrainFromRoute(t2Route);
-        t3Wagons = generateTrainFromRoute(t3Route);
-
-        trains = new Coordinates[NUMBER_OF_TRAINS][];
-        trains[0] = t1Wagons;
-        trains[1] = t2Wagons;
-        trains[2] = t3Wagons;
+        trains[0] = generateTrainFromRoute(t1Route);
+        trains[1] = generateTrainFromRoute(t2Route);
+        trains[2] = generateTrainFromRoute(t3Route);
 
         this.trainOrder = setTrainOrder(trainOrder);
+
+        t1Crossings = generateCrossings(routes[0][0], routes[0][1]);
+        t2Crossings = generateCrossings(routes[1][0], routes[1][1]);
+        t3Crossings = generateCrossings(routes[2][0], routes[2][1]);
+        crossings[0] = t1Crossings;
+        crossings[1] = t2Crossings;
+        crossings[2] = t3Crossings;
+    }
+
+
+    /**
+     * Generates array of coordinates specifying the route from start to the end via crossings on the tunnel's map
+     *
+     * @param start coordinates of the starting point
+     * @param end   coordinates of the ending point
+     * @return array of coordinates of crossings the route goes through
+     */
+    private Coordinates[] generateCrossings(Coordinates start, Coordinates end) {
+        List<Coordinates> route = new LinkedList<>();
+
+        // first, we have to check if start and end are station entrances opposite to each other in the same line
+        // because then we don't have to go into the passage
+        if (start.getRow() == end.getRow() && Math.abs(end.getCol() - start.getCol()) == TunnelsMapMonitor.getWidth() - 3) {
+            route.add(start);
+            route.add(new Coordinates(start.getRow(), TunnelsMapMonitor.getWidth() / 2));
+            route.add(end);
+            return route.toArray(new Coordinates[0]);
+        }
+        if (start.getCol() == end.getCol() && Math.abs(end.getRow() - start.getRow()) == TunnelsMapMonitor.getHeight() - 3) {
+            route.add(start);
+            route.add(new Coordinates(TunnelsMapMonitor.getHeight() / 2, start.getCol()));
+            route.add(end);
+            return route.toArray(new Coordinates[0]);
+        }
+
+        // if not, we create a route through the passage by connecting two routes:
+        //  - from start the middle
+        //  - a reversed route from end to the middle
+        route = getCrossingsToMiddle(start);
+        route.add(middle);
+
+        List<Coordinates> routeToMiddleFromEnd = getCrossingsToMiddle(end);
+        Collections.reverse(routeToMiddleFromEnd);
+        route.addAll(routeToMiddleFromEnd);
+
+        return route.toArray(new Coordinates[0]);
+    }
+
+
+    /**
+     * Generates list of crossings to pass through when going from start to the middle of the map
+     *
+     * @param start coordinates of the starting point
+     */
+    private List<Coordinates> getCrossingsToMiddle(Coordinates start) {
+        List<Coordinates> route = new LinkedList<>();
+        Coordinates actEnd;
+
+        // first we add a line to the crossing
+        if (start.getCol() == 1 || start.getCol() == TunnelsMapMonitor.getWidth() - 2) {
+            actEnd = new Coordinates(start.getRow(), TunnelsMapMonitor.getWidth() / 2);
+        } else {
+            actEnd = new Coordinates(TunnelsMapMonitor.getHeight() / 2, start.getCol());
+        }
+        route.add(start);
+        route.add(actEnd);
+
+        return route;
     }
 
 
