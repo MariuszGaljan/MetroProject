@@ -34,11 +34,11 @@ public class SimulationModel {
     public SimulationModel(FieldTypes[] trainOrder) {
         // here we specify the parameters of the simulation
         modelParams = new ModelParameters(trainOrder);
-        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.crossings);
+        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.crossings);
 
-        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Crossings);
-        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Crossings);
-        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.t3Wagons, modelParams.t3Crossings);
+        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.trains[0], modelParams.t1Crossings);
+        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.trains[1], modelParams.t2Crossings);
+        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.trains[2], modelParams.t3Crossings);
 
         for (Thread t : trains)
             t.start();
@@ -59,11 +59,11 @@ public class SimulationModel {
     public SimulationModel(FieldTypes[] trainOrder, Coordinates[][] routes) {
         // here we specify the parameters of the simulation
         modelParams = new ModelParameters(trainOrder, routes);
-        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.stations, modelParams.crossings);
+        monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.crossings);
 
-        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.t1Wagons, modelParams.t1Crossings);
-        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.t2Wagons, modelParams.t2Crossings);
-        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.t3Wagons, modelParams.t3Crossings);
+        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.trains[0], modelParams.t1Crossings);
+        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.trains[1], modelParams.t2Crossings);
+        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.trains[2], modelParams.t3Crossings);
 
         for (Thread t : trains)
             t.start();

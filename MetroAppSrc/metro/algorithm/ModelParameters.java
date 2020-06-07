@@ -4,7 +4,10 @@ import metro.algorithm.map.Coordinates;
 import metro.algorithm.map.FieldTypes;
 import metro.algorithm.map.TunnelsMapMonitor;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -30,19 +33,6 @@ ModelParameters {
      */
     private static final Coordinates middle
             = new Coordinates(TunnelsMapMonitor.getHeight() / 2, TunnelsMapMonitor.getWidth() / 2);
-
-    /**
-     * Array of coordinates of stations on the map
-     */
-    public Coordinates[] stations = {
-            new Coordinates(0, 0),
-            new Coordinates(0, 10),
-            new Coordinates(16, 0),
-            new Coordinates(16, 10)
-    };
-
-
-    public Coordinates[] t1Wagons, t2Wagons, t3Wagons;
 
     /**
      * Array of trains.
@@ -74,13 +64,9 @@ ModelParameters {
         t2Route = generateRoute(new Coordinates(16, 1), new Coordinates(1, 0));
         t3Route = generateRoute(new Coordinates(15, 10), new Coordinates(0, 1));
 
-        t1Wagons = generateTrainFromRoute(t1Route);
-        t2Wagons = generateTrainFromRoute(t2Route);
-        t3Wagons = generateTrainFromRoute(t3Route);
-
-        trains[0] = t1Wagons;
-        trains[1] = t2Wagons;
-        trains[2] = t3Wagons;
+        trains[0] = generateTrainFromRoute(t1Route);
+        trains[1] = generateTrainFromRoute(t2Route);
+        trains[2] = generateTrainFromRoute(t3Route);
 
         this.trainOrder = setTrainOrder(trainOrder);
 
@@ -104,13 +90,9 @@ ModelParameters {
         t2Route = generateRoute(routes[1][0], routes[1][1]);
         t3Route = generateRoute(routes[2][0], routes[2][1]);
 
-        t1Wagons = generateTrainFromRoute(t1Route);
-        t2Wagons = generateTrainFromRoute(t2Route);
-        t3Wagons = generateTrainFromRoute(t3Route);
-
-        trains[0] = t1Wagons;
-        trains[1] = t2Wagons;
-        trains[2] = t3Wagons;
+        trains[0] = generateTrainFromRoute(t1Route);
+        trains[1] = generateTrainFromRoute(t2Route);
+        trains[2] = generateTrainFromRoute(t3Route);
 
         this.trainOrder = setTrainOrder(trainOrder);
 

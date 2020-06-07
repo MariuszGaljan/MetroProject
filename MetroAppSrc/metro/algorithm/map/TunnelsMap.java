@@ -29,9 +29,14 @@ class TunnelsMap {
             S = FieldTypes.STATION;
 
     /**
-     * Array of coordinates of the stations on the map.
+     * Array of coordinates of stations on the map
      */
-    public static Coordinates[] stations;
+    public Coordinates[] stations = {
+            new Coordinates(0, 0),
+            new Coordinates(0, 10),
+            new Coordinates(16, 0),
+            new Coordinates(16, 10)
+    };
 
     /**
      * The 2D array representing the tunnel's map.
@@ -39,7 +44,7 @@ class TunnelsMap {
      * Each tile is defined by one of the enum FieldTypes values.
      */
     public FieldTypes[][] map = {
-            {E, E, E, E, E, E, E, E, E, E, E},
+            {S, E, E, E, E, E, E, E, E, E, S},
             {E, W, W, W, W, E, W, W, W, W, E},
             {E, W, W, W, W, E, W, W, W, W, E},
             {E, W, W, W, W, E, W, W, W, W, E},
@@ -55,7 +60,7 @@ class TunnelsMap {
             {E, W, W, W, W, E, W, W, W, W, E},
             {E, W, W, W, W, E, W, W, W, W, E},
             {E, W, W, W, W, E, W, W, W, W, E},
-            {E, E, E, E, E, E, E, E, E, E, E},
+            {S, E, E, E, E, E, E, E, E, E, S},
     };
 
     /**

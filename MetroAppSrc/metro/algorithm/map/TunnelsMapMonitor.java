@@ -23,39 +23,34 @@ public class TunnelsMapMonitor {
      */
     ReadWriteLock ioLock = new ReentrantReadWriteLock();
 
-    CrossingsLock crossingsLock;
-
+    SegmentLock segmentLock;
 
     /**
      * Constructor of TunnelsMapMonitor class.
      *
-     * @param trains   an array of trains.
-     *                 Each train is defined by an array of Coordinates values of its wagons.
-     * @param stations an array of stations' coordinates
+     * @param trains an array of trains.
+     *               Each train is defined by an array of Coordinates values of its wagons.
      */
-    public TunnelsMapMonitor(Coordinates[][] trains, Coordinates[] stations, Coordinates[][] crossings) {
+    public TunnelsMapMonitor(Coordinates[][] trains, Coordinates[][] trainRoutes) {
         // adding trains to the map
         markTrain(trains[0], FieldTypes.T1);
         markTrain(trains[1], FieldTypes.T2);
         markTrain(trains[2], FieldTypes.T3);
 
-        // adding station to the map
-        TunnelsMap.stations = stations;
-        for (Coordinates station : TunnelsMap.stations)
-            tunnelsMap[station.getRow()][station.getCol()] = FieldTypes.STATION;
-
-        Set<Coordinates> crossingsSet = new HashSet<>();
-        for (Coordinates[] trainCrossings : crossings)
-            crossingsSet.addAll(Arrays.asList(trainCrossings));
-        crossingsLock = new CrossingsLock(crossingsSet.toArray(new Coordinates[0]));
+        segmentLock = new SegmentLock(createSharedSegments(trainRoutes));
+        System.out.println("Shared segments: " + segmentLock);
+        System.out.println();
     }
 
 
     /**
      * Procedure used to acquire the locks needed to achieve thread safety.
      */
-    public void beginCourse(Coordinates start) {
-       crossingsLock.lockCrossing(start);
+    public void beginCourse(Coordinates start, FieldTypes train) {
+//        for (Segment s : segments) {
+//            if (s.isTrainCrossing(train) && (start == s.getStart() || start == s.getEnd()))
+//
+//        }
     }
 
 
@@ -109,10 +104,44 @@ public class TunnelsMapMonitor {
      * Should be called after the beginCourse function
      * Adds the train that reached its destination to the end of the queue.
      *
-     * @param start     coordinates of the starting point to unlock
+     * @param start coordinates of the starting point to unlock
      */
     public void endCourse(Coordinates start) {
-        crossingsLock.unlockCrossing(start);
+    }
+
+    private Segment[] createSharedSegments(Coordinates[][] trainRoutes) {
+        List<Segment> segments = new LinkedList<>();
+        FieldTypes[] trains = {FieldTypes.T1, FieldTypes.T2, FieldTypes.T3};
+
+        for (int i = 0; i < trainRoutes.length; i++) {
+            for (int j = 0; j < trainRoutes.length; j++) {
+                if (i == j)
+                    continue;
+                Segment[] sharedSegments = getSharedSegmentsForTwoTrains(trainRoutes[i], trainRoutes[j], trains[i], trains[j]);
+                segments.addAll(Arrays.asList(sharedSegments));
+            }
+        }
+
+        return segments.toArray(new Segment[0]);
+    }
+
+
+    private Segment[] getSharedSegmentsForTwoTrains(Coordinates[] t1Route, Coordinates[] t2Route, FieldTypes t1, FieldTypes t2) {
+        LinkedList<Segment> segments = new LinkedList<>();
+        Set<Coordinates> otherRoute = new HashSet<>(Arrays.asList(t2Route));
+        Coordinates actStart = t1Route[0];
+        for (int i = 0; i < t1Route.length - 1; i++) {
+            if (otherRoute.contains(t1Route[i]) && !otherRoute.contains(t1Route[i + 1])) {
+                segments.add(new Segment(actStart, t1Route[i], t1));
+                actStart = t1Route[i];
+            }
+            if (!otherRoute.contains(t1Route[i]) && otherRoute.contains(t1Route[i + 1])) {
+                actStart = t1Route[i + 1];
+            }
+        }
+        if (otherRoute.contains(t1Route[t1Route.length - 2]) && otherRoute.contains(t1Route[t1Route.length - 1]))
+            segments.add(new Segment(actStart, t1Route[t1Route.length - 1], t1));
+        return segments.toArray(new Segment[0]);
     }
 
 

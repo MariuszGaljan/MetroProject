@@ -64,14 +64,14 @@ public class Train extends Thread {
                 if (moveForward) {
                     for (int i = 0; i < route.length - 1; i++) {
                         checkPause();
-                        tunnelsMap.beginCourse(route[i]);
+                        tunnelsMap.beginCourse(route[i], trainType);
                         tunnelsMap.moveToNextCrossing(route[i], route[i + 1], wagons, trainType);
                         tunnelsMap.endCourse(route[i]);
                     }
                 } else {
                     for (int i = route.length - 1; i > 0; i--) {
                         checkPause();
-                        tunnelsMap.beginCourse(route[i]);
+                        tunnelsMap.beginCourse(route[i], trainType);
                         tunnelsMap.moveToNextCrossing(route[i], route[i - 1], wagons, trainType);
                         tunnelsMap.endCourse(route[i]);
                     }
