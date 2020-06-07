@@ -20,8 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @see Coordinates
  * @see FieldTypes
  */
-public class
-ModelParameters {
+public class ModelParameters {
     public static final int NUMBER_OF_TRAINS = 3;
     /**
      * Number of wagons in each train
@@ -105,6 +104,13 @@ ModelParameters {
     }
 
 
+    /**
+     * Generates array of coordinates specifying the route from start to the end via crossings on the tunnel's map
+     *
+     * @param start coordinates of the starting point
+     * @param end   coordinates of the ending point
+     * @return array of coordinates of crossings the route goes through
+     */
     private Coordinates[] generateCrossings(Coordinates start, Coordinates end) {
         List<Coordinates> route = new LinkedList<>();
 
@@ -137,6 +143,11 @@ ModelParameters {
     }
 
 
+    /**
+     * Generates list of crossings to pass through when going from start to the middle of the map
+     *
+     * @param start coordinates of the starting point
+     */
     private List<Coordinates> getCrossingsToMiddle(Coordinates start) {
         List<Coordinates> route = new LinkedList<>();
         Coordinates actEnd;

@@ -1,7 +1,8 @@
 package metro.algorithm.map;
 
 import java.util.*;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Class used to access the map of the tunnels.
@@ -23,6 +24,9 @@ public class TunnelsMapMonitor {
      */
     ReadWriteLock ioLock = new ReentrantReadWriteLock();
 
+    /**
+     * Used for storing and synchronization of shared route segments
+     */
     SegmentLock segmentLock;
 
     /**
@@ -44,40 +48,41 @@ public class TunnelsMapMonitor {
 
 
     /**
-     * Procedure used to acquire the locks needed to achieve thread safety.
-     */
-    public void beginCourse(Coordinates start, FieldTypes train) {
-//        for (Segment s : segments) {
-//            if (s.isTrainCrossing(train) && (start == s.getStart() || start == s.getEnd()))
-//
-//        }
-    }
-
-
-    /**
-     * Procedure moving the train via the route to its destination
+     * Procedure moving the train from crossing start to crossing end
      *
-     * @param start     coordinates of current crossing
-     * @param end       coordinates of destination crossing
-     * @param wagons    array of Coordinates defining the individual wagons of the train.
-     * @param trainType one of the T1, T2, T3 values of enum FieldTypes
+     * @param start       coordinates of current crossing
+     * @param end         coordinates of destination crossing
+     * @param wagons      array of Coordinates defining the individual wagons of the train.
+     * @param trainType   one of the T1, T2, T3 values of enum FieldTypes
+     * @param moveForward boolean value specifying the direction the train is heading
      * @throws InterruptedException this method uses sleep to visualize the transition in GUI
      */
-    public void moveToNextCrossing(Coordinates start, Coordinates end, Coordinates[] wagons, FieldTypes trainType)
+    public void moveToNextCrossing(Coordinates start, Coordinates end, Coordinates[] wagons, FieldTypes trainType, boolean moveForward)
             throws InterruptedException {
         boolean horizontal = start.getRow() == end.getRow();
+        boolean previousSegmentReleased = false;
+
+        segmentLock.lockTrainSegments(trainType, start, moveForward);
 
         if (horizontal) {
             if (start.getCol() < end.getCol()) {
                 // left to right
                 for (int i = start.getCol(); i < end.getCol(); i++) {
                     moveTrain(wagons, new Coordinates(start.getRow(), i), trainType);
+                    if (!previousSegmentReleased && !trainIsOnCrossing(start, wagons)) {
+                        segmentLock.unlockTrainSegments(trainType, start, moveForward);
+                        previousSegmentReleased = true;
+                    }
                     Thread.sleep(200);
                 }
             } else {
                 // right to left
                 for (int i = start.getCol(); i > end.getCol(); i--) {
                     moveTrain(wagons, new Coordinates(start.getRow(), i), trainType);
+                    if (!previousSegmentReleased && !trainIsOnCrossing(start, wagons)) {
+                        segmentLock.unlockTrainSegments(trainType, start, moveForward);
+                        previousSegmentReleased = true;
+                    }
                     Thread.sleep(200);
                 }
             }
@@ -86,12 +91,20 @@ public class TunnelsMapMonitor {
                 // top to bottom
                 for (int i = start.getRow(); i < end.getRow(); i++) {
                     moveTrain(wagons, new Coordinates(i, start.getCol()), trainType);
+                    if (!previousSegmentReleased && !trainIsOnCrossing(start, wagons)) {
+                        segmentLock.unlockTrainSegments(trainType, start, moveForward);
+                        previousSegmentReleased = true;
+                    }
                     Thread.sleep(200);
                 }
             } else {
                 // bottom to top
                 for (int i = start.getRow(); i > end.getRow(); i--) {
                     moveTrain(wagons, new Coordinates(i, start.getCol()), trainType);
+                    if (!previousSegmentReleased && !trainIsOnCrossing(start, wagons)) {
+                        segmentLock.unlockTrainSegments(trainType, start, moveForward);
+                        previousSegmentReleased = true;
+                    }
                     Thread.sleep(200);
                 }
             }
@@ -100,15 +113,28 @@ public class TunnelsMapMonitor {
 
 
     /**
-     * Procedure used to release the locks and the starting point of the train.
-     * Should be called after the beginCourse function
-     * Adds the train that reached its destination to the end of the queue.
+     * Checks if the one of the wagons is on the crossing.
      *
-     * @param start coordinates of the starting point to unlock
+     * @param crossing coordinates of the crossing
+     * @param wagons   coordinates of the train's wagons
+     * @return true if a wagon's coordinates are equal to crossing's
+     * false otherwise
      */
-    public void endCourse(Coordinates start) {
+    private boolean trainIsOnCrossing(Coordinates crossing, Coordinates[] wagons) {
+        for (Coordinates wagon : wagons) {
+            if (wagon.equals(crossing))
+                return true;
+        }
+        return false;
     }
 
+    /**
+     * Analyzes the trains' routes and creates shared segments based on them.
+     * Every train has its own copy of a segment.
+     *
+     * @param trainRoutes array of Coordinates arrays of train routes
+     * @return array of shared segments
+     */
     private Segment[] createSharedSegments(Coordinates[][] trainRoutes) {
         List<Segment> segments = new LinkedList<>();
         FieldTypes[] trains = {FieldTypes.T1, FieldTypes.T2, FieldTypes.T3};
@@ -121,11 +147,20 @@ public class TunnelsMapMonitor {
                 segments.addAll(Arrays.asList(sharedSegments));
             }
         }
-
         return segments.toArray(new Segment[0]);
     }
 
 
+    /**
+     * Analyzes the routes of two trains and creates shared segments based on them.
+     * Every train has its own copy of a segment.
+     *
+     * @param t1Route array of coordinates specifying the route of the first train
+     * @param t2Route array of coordinates specifying the route of the second train
+     * @param t1      enum value used for segment owner identification
+     * @param t2      enum value used for segment owner identification
+     * @return array of shared segments
+     */
     private Segment[] getSharedSegmentsForTwoTrains(Coordinates[] t1Route, Coordinates[] t2Route, FieldTypes t1, FieldTypes t2) {
         LinkedList<Segment> segments = new LinkedList<>();
         Set<Coordinates> otherRoute = new HashSet<>(Arrays.asList(t2Route));
