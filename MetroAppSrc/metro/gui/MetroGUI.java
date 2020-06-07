@@ -143,6 +143,11 @@ public class MetroGUI extends JFrame {
                     protected Void doInBackground() {
                         while (isRunning.get()) {
                             updateGUI();
+                            try {
+                                Thread.sleep(30);
+                            } catch (InterruptedException interruptedException) {
+                                interruptedException.printStackTrace();
+                            }
                         }
                         return null;
                     }
