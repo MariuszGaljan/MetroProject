@@ -243,6 +243,9 @@ public class MetroGUI extends JFrame {
         metro = new SimulationModel(routes);
         tunnelsMapMonitor = metro.getMonitor();
         mapPanelType.setTunnelsMapMonitor(tunnelsMapMonitor);
+        metro.setSleepTime(FieldTypes.T1, actT1Speed);
+        metro.setSleepTime(FieldTypes.T2, actT2Speed);
+        metro.setSleepTime(FieldTypes.T3, actT3Speed);
     }
 
     /**
