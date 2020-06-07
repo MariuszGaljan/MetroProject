@@ -32,8 +32,7 @@ public class MetroGUI extends JFrame {
      * combo box used for the initial train order selection
      */
     private JComboBox<FieldTypes> train1Select, train2Select, train3Select;
-    private JPanel trainOrderSelection;
-    private JPanel trainRouteSelection;
+    private JPanel trainOrderSelection, trainRouteSelection;
     private JPanel train1Route;
     /**
      * Box used to specify one of the ends of the route of train T1

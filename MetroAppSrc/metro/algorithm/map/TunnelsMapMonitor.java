@@ -29,6 +29,11 @@ public class TunnelsMapMonitor {
      */
     SegmentLock segmentLock;
 
+    private int t1SleepTime = 100;
+    private int t2SleepTime = 200;
+    private int t3SleepTime = 300;
+
+
     /**
      * Constructor of TunnelsMapMonitor class.
      *
@@ -73,7 +78,7 @@ public class TunnelsMapMonitor {
                         segmentLock.unlockTrainSegments(trainType, start, moveForward);
                         previousSegmentReleased = true;
                     }
-                    Thread.sleep(200);
+                    wait(trainType);
                 }
             } else {
                 // right to left
@@ -83,7 +88,7 @@ public class TunnelsMapMonitor {
                         segmentLock.unlockTrainSegments(trainType, start, moveForward);
                         previousSegmentReleased = true;
                     }
-                    Thread.sleep(200);
+                    wait(trainType);
                 }
             }
         } else {
@@ -95,7 +100,7 @@ public class TunnelsMapMonitor {
                         segmentLock.unlockTrainSegments(trainType, start, moveForward);
                         previousSegmentReleased = true;
                     }
-                    Thread.sleep(200);
+                    wait(trainType);
                 }
             } else {
                 // bottom to top
@@ -105,9 +110,18 @@ public class TunnelsMapMonitor {
                         segmentLock.unlockTrainSegments(trainType, start, moveForward);
                         previousSegmentReleased = true;
                     }
-                    Thread.sleep(200);
+                    wait(trainType);
                 }
             }
+        }
+    }
+
+    private void wait(FieldTypes train) throws InterruptedException{
+        switch (train) {
+            case T1 -> Thread.sleep(t1SleepTime);
+            case T2 -> Thread.sleep(t2SleepTime);
+            case T3 -> Thread.sleep(t3SleepTime);
+            default -> Thread.sleep(200);
         }
     }
 
@@ -275,6 +289,14 @@ public class TunnelsMapMonitor {
 
     public static int getHeight() {
         return TunnelsMap.HEIGHT;
+    }
+
+    public void setSleepTime(int sleepTime, FieldTypes train) {
+        switch (train) {
+            case T1 -> t1SleepTime = sleepTime;
+            case T2 -> t2SleepTime = sleepTime;
+            case T3 -> t3SleepTime = sleepTime;
+        }
     }
 
     /**

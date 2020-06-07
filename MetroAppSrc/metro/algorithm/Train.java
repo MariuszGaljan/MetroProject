@@ -112,4 +112,13 @@ public class Train extends Thread {
             startPauseMonitor.notify();
         }
     }
+
+    /**
+     * Changes the time train spends sleeping after moving to next tile
+     *
+     * @param sleepTime time in ms
+     */
+    public void setSleepTime(int sleepTime) {
+        tunnelsMap.setSleepTime(sleepTime, trainType);
+    }
 }

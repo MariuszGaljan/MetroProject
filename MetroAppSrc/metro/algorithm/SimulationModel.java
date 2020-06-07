@@ -133,4 +133,12 @@ public class SimulationModel {
         ends[2] = modelParams.t3Route[modelParams.t3Route.length - 1];
         return ends;
     }
+
+    public void setSleepTime(FieldTypes train, int sleepTime) {
+        switch (train) {
+            case T1 -> trains[0].setSleepTime(sleepTime);
+            case T2 -> trains[1].setSleepTime(sleepTime);
+            case T3 -> trains[2].setSleepTime(sleepTime);
+        }
+    }
 }
