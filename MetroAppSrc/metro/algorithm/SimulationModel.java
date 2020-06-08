@@ -24,6 +24,10 @@ public class SimulationModel {
      */
     Train[] trains = new Train[ModelParameters.NUMBER_OF_TRAINS];
 
+    /**
+     * Array of enums representing the trains
+     */
+    FieldTypes[] trainTypes = {FieldTypes.T1, FieldTypes.T2, FieldTypes.T3};
 
     /**
      * Initializes routes to the default values.
@@ -33,9 +37,8 @@ public class SimulationModel {
         modelParams = new ModelParameters();
         monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.crossings);
 
-        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.trains[0], modelParams.t1Crossings);
-        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.trains[1], modelParams.t2Crossings);
-        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.trains[2], modelParams.t3Crossings);
+        for (int i = 0; i < trains.length; i++)
+            trains[i] = new Train(monitor, trainTypes[i], modelParams.trains[i], modelParams.crossings[i]);
 
         for (Thread t : trains)
             t.start();
@@ -47,18 +50,17 @@ public class SimulationModel {
     /**
      * Initializes routes to the default values.
      *
-     * @param routes     an array of Coordinates pairs, specifying each route's start and end
-     *                   e.g. For train 1 route routes[0][0] = start, route[0][1] = end
-     *                   For train 2 route routes[1][0] = start, route[1][1] = end
+     * @param routes an array of Coordinates pairs, specifying each route's start and end
+     *               e.g. For train 1 route routes[0][0] = start, route[0][1] = end
+     *               For train 2 route routes[1][0] = start, route[1][1] = end
      */
     public SimulationModel(Coordinates[][] routes) {
         // here we specify the parameters of the simulation
         modelParams = new ModelParameters(routes);
         monitor = new TunnelsMapMonitor(modelParams.trains, modelParams.crossings);
 
-        trains[0] = new Train(monitor, FieldTypes.T1, modelParams.trains[0], modelParams.t1Crossings);
-        trains[1] = new Train(monitor, FieldTypes.T2, modelParams.trains[1], modelParams.t2Crossings);
-        trains[2] = new Train(monitor, FieldTypes.T3, modelParams.trains[2], modelParams.t3Crossings);
+        for (int i = 0; i < trains.length; i++)
+            trains[i] = new Train(monitor, trainTypes[i], modelParams.trains[i], modelParams.crossings[i]);
 
         for (Thread t : trains)
             t.start();
@@ -114,21 +116,25 @@ public class SimulationModel {
 
     public Coordinates[] getRouteStarts() {
         Coordinates[] starts = new Coordinates[ModelParameters.NUMBER_OF_TRAINS];
-        starts[0] = modelParams.t1Route[0];
-        starts[1] = modelParams.t2Route[0];
-        starts[2] = modelParams.t3Route[0];
+        for (int i = 0; i < starts.length; i++)
+            starts[i] = modelParams.crossings[i][0];
         return starts;
     }
 
 
     public Coordinates[] getRouteEnds() {
         Coordinates[] ends = new Coordinates[ModelParameters.NUMBER_OF_TRAINS];
-        ends[0] = modelParams.t1Route[modelParams.t1Route.length - 1];
-        ends[1] = modelParams.t2Route[modelParams.t2Route.length - 1];
-        ends[2] = modelParams.t3Route[modelParams.t3Route.length - 1];
+        for (int i = 0; i < ends.length; i++)
+            ends[i] = modelParams.crossings[i][modelParams.crossings[i].length - 1];
         return ends;
     }
 
+    /**
+     * Set the time a train waits after moving to the next tile
+     *
+     * @param train     enum value identifying the train
+     * @param sleepTime time in ms
+     */
     public void setSleepTime(FieldTypes train, int sleepTime) {
         switch (train) {
             case T1 -> trains[0].setSleepTime(sleepTime);

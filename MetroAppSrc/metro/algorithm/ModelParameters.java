@@ -38,31 +38,27 @@ public class ModelParameters {
     public Coordinates[][] trains = new Coordinates[NUMBER_OF_TRAINS][];
 
     /**
-     * An array of coordinates specifying the route of the train.
+     * Specifies the routes of trains
      */
-    public Coordinates[] t1Route, t2Route, t3Route;
-
-    public Coordinates[] t1Crossings, t2Crossings, t3Crossings;
     public Coordinates[][] crossings = new Coordinates[NUMBER_OF_TRAINS][];
+
+    /**
+     * Specifies start and end for each train's route
+     */
+    private Coordinates[][] initialPoints = {
+            {new Coordinates(0, 1), new Coordinates(16, 9)},
+            {new Coordinates(16, 1), new Coordinates(1, 0)},
+            {new Coordinates(15, 10), new Coordinates(0, 1)}
+    };
 
     /**
      * Initializes routes to the default values.
      */
     public ModelParameters() {
-        t1Route = generateRoute(new Coordinates(0, 1), new Coordinates(16, 9));
-        t2Route = generateRoute(new Coordinates(16, 1), new Coordinates(1, 0));
-        t3Route = generateRoute(new Coordinates(15, 10), new Coordinates(0, 1));
-
-        trains[0] = generateTrainFromRoute(t1Route);
-        trains[1] = generateTrainFromRoute(t2Route);
-        trains[2] = generateTrainFromRoute(t3Route);
-
-        t1Crossings = generateCrossings(new Coordinates(0, 1), new Coordinates(16, 9));
-        t2Crossings = generateCrossings(new Coordinates(16, 1), new Coordinates(1, 0));
-        t3Crossings = generateCrossings(new Coordinates(15, 10), new Coordinates(0, 1));
-        crossings[0] = t1Crossings;
-        crossings[1] = t2Crossings;
-        crossings[2] = t3Crossings;
+        for (int i = 0; i < trains.length; i++) {
+            trains[i] = generateTrain(initialPoints[i][0]);
+            crossings[i] = generateCrossings(initialPoints[i][0], initialPoints[i][1]);
+        }
     }
 
     /**
@@ -71,20 +67,11 @@ public class ModelParameters {
      *               For train 2 route routes[1][0] = start, route[1][1] = end
      */
     public ModelParameters(Coordinates[][] routes) {
-        t1Route = generateRoute(routes[0][0], routes[0][1]);
-        t2Route = generateRoute(routes[1][0], routes[1][1]);
-        t3Route = generateRoute(routes[2][0], routes[2][1]);
-
-        trains[0] = generateTrainFromRoute(t1Route);
-        trains[1] = generateTrainFromRoute(t2Route);
-        trains[2] = generateTrainFromRoute(t3Route);
-
-        t1Crossings = generateCrossings(routes[0][0], routes[0][1]);
-        t2Crossings = generateCrossings(routes[1][0], routes[1][1]);
-        t3Crossings = generateCrossings(routes[2][0], routes[2][1]);
-        crossings[0] = t1Crossings;
-        crossings[1] = t2Crossings;
-        crossings[2] = t3Crossings;
+        initialPoints = routes;
+        for (int i = 0; i < trains.length; i++) {
+            trains[i] = generateTrain(initialPoints[i][0]);
+            crossings[i] = generateCrossings(initialPoints[i][0], initialPoints[i][1]);
+        }
     }
 
 
@@ -128,15 +115,18 @@ public class ModelParameters {
 
 
     /**
-     * Generates list of crossings to pass through when going from start to the middle of the map
+     * Generates list of crossings to pass through when going from start to the middle of the map,
+     * middle exclusive
      *
      * @param start coordinates of the starting point
+     * @return list of crossing the train passes from the starting point to the middle
+     * in range [start, middle)
      */
     private List<Coordinates> getCrossingsToMiddle(Coordinates start) {
         List<Coordinates> route = new LinkedList<>();
         Coordinates actEnd;
 
-        // first we add a line to the crossing
+        // to get to the middle every train has to pass one crossing in between two stations
         if (start.getCol() == 1 || start.getCol() == TunnelsMapMonitor.getWidth() - 2) {
             actEnd = new Coordinates(start.getRow(), TunnelsMapMonitor.getWidth() / 2);
         } else {
@@ -148,74 +138,6 @@ public class ModelParameters {
         return route;
     }
 
-
-    /**
-     * Generates a route from [start, end] (inclusive both ways).
-     *
-     * @param start coordinates of the starting point of the route
-     * @param end   coordinates of the end point of the route
-     * @return route from start to the end given by a list of coordinates
-     */
-    private Coordinates[] generateRoute(Coordinates start, Coordinates end) {
-        List<Coordinates> route;
-
-        // first, we have to check if start and end are station entrances opposite to each other in the same line
-        // because then we don't have to go into the passage
-        if (start.getRow() == end.getRow() && Math.abs(end.getCol() - start.getCol()) == TunnelsMapMonitor.getWidth() - 3) {
-            route = new LinkedList<>();
-            addLine(route, start, end, true);
-            route.add(end);
-            return route.toArray(new Coordinates[0]);
-        }
-        if (start.getCol() == end.getCol() && Math.abs(end.getRow() - start.getRow()) == TunnelsMapMonitor.getHeight() - 3) {
-            route = new LinkedList<>();
-            addLine(route, start, end, false);
-            route.add(end);
-            return route.toArray(new Coordinates[0]);
-        }
-
-        // if not, we create a route through the passage by connecting two routes:
-        //  - from start the middle
-        //  - a reversed route from end to the middle
-        route = getRouteToTheMiddle(start);
-        route.add(middle);
-
-        List<Coordinates> routeToMiddleFromEnd = getRouteToTheMiddle(end);
-        Collections.reverse(routeToMiddleFromEnd);
-        route.addAll(routeToMiddleFromEnd);
-
-        return route.toArray(new Coordinates[0]);
-    }
-
-    /**
-     * Generates a list of coordinates specifying a route from start to the middle of the map
-     *
-     * @param start Coordinates of the starting point
-     * @return route from start to the middle given by a list of coordinates
-     */
-    private List<Coordinates> getRouteToTheMiddle(Coordinates start) {
-        List<Coordinates> route = new LinkedList<>();
-        Coordinates actStart = start;
-        Coordinates actEnd;
-        boolean actHorizontal;
-
-        // first we add a line to the crossing
-        if (actStart.getCol() == 1 || actStart.getCol() == TunnelsMapMonitor.getWidth() - 2) {
-            actHorizontal = true;
-            actEnd = new Coordinates(actStart.getRow(), TunnelsMapMonitor.getWidth() / 2);
-        } else {
-            actHorizontal = false;
-            actEnd = new Coordinates(TunnelsMapMonitor.getHeight() / 2, actStart.getCol());
-        }
-        addLine(route, actStart, actEnd, actHorizontal);
-        actStart = actEnd;
-
-        // then we add a line to the middle
-        actHorizontal = (actStart.getRow() == middle.getRow());
-        addLine(route, actStart, middle, actHorizontal);
-
-        return route;
-    }
 
     /**
      * Appends a line represented by a list of coordinates to the route.
@@ -253,16 +175,23 @@ public class ModelParameters {
 
 
     /**
-     * Creates a new train by making a copy of the first TRAIN_LENGTH elements
-     * from the route array.
+     * Generates an array of coordinates specifying train's wagons, based on its starting point
      *
-     * @param route array of coordinates specifying the route of the train
-     * @return an array of coordinates specifying the wagons of the train
+     * @param start coordinates of the train's starting point
+     * @return array of coordinates of train's wagons of length TRAIN_LENGTH
      */
-    private Coordinates[] generateTrainFromRoute(Coordinates[] route) {
-        Coordinates[] train = new Coordinates[TRAIN_LENGTH];
-        for (int i = 0; i < TRAIN_LENGTH && i < route.length; i++)
-            train[i] = new Coordinates(route[i]);
-        return train;
+    private Coordinates[] generateTrain(Coordinates start) {
+        List<Coordinates> train = new LinkedList<>();
+
+        if (start.equals(new Coordinates(0, 1))
+                || start.equals(new Coordinates(0, 9))
+                || start.equals(new Coordinates(16, 1))
+                || start.equals(new Coordinates(16, 9))) {
+            addLine(train, start, new Coordinates(start.getRow(), TunnelsMapMonitor.getWidth() / 2), true);
+        } else {
+            addLine(train, start, new Coordinates(TunnelsMapMonitor.getHeight() / 2, start.getCol()), false);
+        }
+
+        return train.subList(0, TRAIN_LENGTH).toArray(new Coordinates[0]);
     }
 }

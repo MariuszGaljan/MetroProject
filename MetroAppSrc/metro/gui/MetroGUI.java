@@ -264,18 +264,19 @@ public class MetroGUI extends JFrame {
      * @return true if there are no duplicates, false otherwise
      */
     private boolean routesAreValid() {
+        List<Coordinates> trainStartsList = new LinkedList<>();
+        trainStartsList.add((Coordinates) train1Start.getSelectedItem());
+        trainStartsList.add((Coordinates) train2Start.getSelectedItem());
+        trainStartsList.add((Coordinates) train3Start.getSelectedItem());
+        Coordinates[] trainStarts = trainStartsList.toArray(new Coordinates[0]);
+
         // first we check if every train has its own starting entrance
-        Set<Coordinates> trainStartsSet = new HashSet<>();
-        trainStartsSet.add((Coordinates) train1Start.getSelectedItem());
-        trainStartsSet.add((Coordinates) train2Start.getSelectedItem());
-        trainStartsSet.add((Coordinates) train3Start.getSelectedItem());
+        Set<Coordinates> trainStartsSet = new HashSet<>(trainStartsList);
 
         if (trainStartsSet.size() != metro.getNumberOfTrains()) {
             JOptionPane.showMessageDialog(this, "Every train has to have a different starting point");
             return false;
         }
-
-        Coordinates[] trainStarts = trainStartsSet.toArray(new Coordinates[0]);
 
         List<Coordinates> trainEndsList = new LinkedList<>();
         trainEndsList.add((Coordinates) train1End.getSelectedItem());
