@@ -12,8 +12,6 @@ import java.util.List;
  * Class used to specify parameters of the metro simulation:
  * - trains' wagons
  * - trains' routes
- * - initial order
- * - stations
  *
  * @see Coordinates
  * @see FieldTypes
