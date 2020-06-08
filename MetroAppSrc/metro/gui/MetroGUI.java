@@ -287,7 +287,7 @@ public class MetroGUI extends JFrame {
             Coordinates start = trainStarts[i];
             Coordinates end = trainEnds[i];
 
-            if (start == end) {
+            if (start.equals(end)) {
                 JOptionPane.showMessageDialog(this, "Start and end have to be different");
                 return false;
             }
