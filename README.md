@@ -18,7 +18,11 @@ Our goal is to ensure the trains will **not crash** into each other.
 On creation of a new simulation, the program takes the parameters given via the GUI and generates the trains.
 Next, it compares trains' routes and creates an array of **shared segments** of the map (parts of the map crossed by more than one train).
 
-When the simulation is launched, the **tunnel's map monitor** object ensures that in each shared segment, there is at most one train at any given time.
+When the simulation is launched, the **tunnel's map monitor** object ensures that in each shared segment, there is at most one train at any given time. 
+
+Therefore, when a train wants to enter a segment that is already taken, it waits until the segment is released and then proceeds.
+
+The train releases the segment as soon as it leaves the last tile of this segment.
 
 
 ## Simulation parameters
