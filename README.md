@@ -1,11 +1,39 @@
-# MetroProject
+# Metro
 A project presenting a concurrently functioning metro.
 
-In this model there are 3 trains. Each train has a designated route, which it follows from one end to another in a loop.
-![Image of initial position](https://github.com/MariuszGaljan/MetroProject/blob/thirdTrain/Photo%201.png?raw=true)
-![Image of a passing train](https://github.com/MariuszGaljan/MetroProject/blob/thirdTrain/Photo%202.png?raw=true)
+You can download an exe with bundled JRE or a JAR file from [here](https://drive.google.com/drive/folders/1VDQe5TNDzlfK08I5kl5aVkaSwmxdNDHh?usp=sharing)
+You can also screenshots at the end of this file.
 
-Our goal is to ensure non of the trains collide on their way.
+## Description
+
+This program simulates a metro net. There are **3 trains**.
+Each train rides along its designated route (forward and backward).
+All the trains move **at the same time**.
+Our goal is to ensure the trains will **not crash** into each other.
 
 
-This program uses java locks and conditions to achieve that, implementing a variation of the five philosophers problem.
+
+## Algorithm
+
+On creation of a new simulation, the program takes the parameters given via the GUI and generates the trains.
+Next, it compares trains' routes and creates an array of **shared segments** of the map (parts of the map crossed by more than one train).
+
+When the simulation is launched, the **tunnel's map monitor** object ensures that in each shared segment, there is at most one train at any given time.
+
+
+## Simulation parameters
+
+For each train, the user can change:
+- its speed
+- its route via beginning and destination coordinates
+
+
+## Screenshots
+- Initial state of the app:
+![Initial state image](https://github.com/MariuszGaljan/MetroProject/blob/master/Images/Init.png?raw=true)
+
+- Running simulation:
+![Running simulation image](https://github.com/MariuszGaljan/MetroProject/blob/master/Images/Running.png?raw=true)
+
+- Changing parameters:
+![Changing parameters image](https://github.com/MariuszGaljan/MetroProject/blob/master/Images/ParamChange.png?raw=true)
